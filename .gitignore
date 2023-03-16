@@ -1,0 +1,15 @@
+# MCMi460 on Github
+
+# Python
+__pycache__/
+venv/
+
+# Windows
+thumbs.db
+
+# macOS
+.DS_Store
+
+# Razor
+sources/
+config/
