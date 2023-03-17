@@ -118,13 +118,22 @@ class Console():
         else:
             return self._log('Failed to download %s' % id, Color.RED)
 
-    def play(self, provider:str, id:str):
+    def play(self, provider:str = None, id:str = None):
         """
         Plays a track from an ID and a specified provider
         """
+        if not provider and not id and self.track['media'] and not self.track['media'].is_playing():
+            self.track['media'].set_pause(0)
+            return self._log('Resumed %s' % self.track['id'], Color.GREEN)
+        elif not provider and not id and self.track['media']:
+            return self._log('This song is still playing!', Color.RED)
+        elif not provider and not id:
+            return self._log('You\'re not currently playing a song!', Color.RED)
+        elif provider and not id:
+            return self._log('Please enter both a provider and an ID', Color.RED)
+        provider = self._getProvider(provider)
         if self.track != track:
             self.stop()
-        provider = self._getProvider(provider)
         media = Source.PLAY_TRACK(provider, id)
         self.track['id'] = id
         self.track['provider'] = provider
@@ -133,12 +142,28 @@ class Console():
         track_info = provider.TRACK_INFO(id)
         return self._log('Now playing %s from %s\nID: %s' % (track_info['title'], track_info['artist'], track_info['id']), Color.GREEN)
 
+    def resume(self):
+        return self.play(None, None)
+
     def list(self, provider:str):
         """
         Shows a list of tracks from a provider
         """
         provider = self._getProvider(provider)
         return self._log('\n'.join(provider.LIST_TRACKS()), Color.BLUE)
+
+    def pause(self):
+        """
+        Pauses the currently playing track
+        """
+        if self.track == track:
+            return self._log('Nothing is currently playing!', Color.RED)
+        id = self.track['id']
+        if self.track['media'].is_playing():
+            self.track['media'].pause()
+            return self._log('Successfully paused %s' % id, Color.GREEN)
+        else:
+            return self._log('Track is already paused!', Color.RED)
 
     def stop(self, log = True):
         """
@@ -147,13 +172,9 @@ class Console():
         if self.track == track:
             return self._log('Nothing is currently playing!', Color.RED) if log else None
         id = self.track['id']
-        if self.track['media'].is_playing():
-            self.track['media'].stop()
-            self.track = track.copy()
-            return self._log('Successfully stopped %s' % id, Color.RED) if log else None
-        else:
-            self.track = track.copy()
-            return None
+        self.track['media'].stop()
+        self.track = track.copy()
+        return self._log('Successfully stopped %s' % id, Color.RED) if log else None
 
     def search(self, provider:str, *terms):
         """
