@@ -4,7 +4,7 @@
 # Imports
 import os, sys, multiprocessing
 import youtube_dl
-import playsound
+import vlc
 import traceback
 if os.name == 'nt':
     import pyreadline3

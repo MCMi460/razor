@@ -15,7 +15,7 @@ class Color:
 track = {
     'id': '',
     'provider': None,
-    'thread': None,
+    'media': None,
 }
 
 class Console():
@@ -73,9 +73,6 @@ class Console():
             raise Exception('provider unknown')
         return provider
 
-    def _playFully(self, provider:object, id:str):
-        Source.PLAY_TRACK(provider, id)
-
     def exit(self):
         """
         Quits application
@@ -104,7 +101,7 @@ class Console():
         """
         Shows your currently playing song
         """
-        if self.track == track or not self.track['thread'].is_alive():
+        if self.track == track or not self.track['media'].is_playing():
             self.track = track.copy()
             return self._log('There\'s no track playing right now!', Color.RED)
         track_info = self.track['provider'].TRACK_INFO(self.track['id'])
@@ -128,11 +125,11 @@ class Console():
         if self.track != track:
             self.stop()
         provider = self._getProvider(provider)
-        thread = multiprocessing.Process(target = self._playFully, args = (provider, id,), daemon = True)
+        media = Source.PLAY_TRACK(provider, id)
         self.track['id'] = id
         self.track['provider'] = provider
-        self.track['thread'] = thread
-        thread.start()
+        self.track['media'] = media
+        media.play()
         track_info = provider.TRACK_INFO(id)
         return self._log('Now playing %s from %s\nID: %s' % (track_info['title'], track_info['artist'], track_info['id']), Color.GREEN)
 
@@ -150,8 +147,8 @@ class Console():
         if self.track == track:
             return self._log('Nothing is currently playing!', Color.RED) if log else None
         id = self.track['id']
-        if self.track['thread'].is_alive():
-            self.track['thread'].terminate()
+        if self.track['media'].is_playing():
+            self.track['media'].stop()
             self.track = track.copy()
             return self._log('Successfully stopped %s' % id, Color.RED) if log else None
         else:
@@ -167,7 +164,6 @@ class Console():
         response = []
         for result in results:
             if not 'Music' in result['categories']:
-                print(result['title'])
                 continue
             response.append(
             ('Title: %s\n'

@@ -1,5 +1,5 @@
 # MCMi460 on Github
 
 youtube-dl
-playsound
+python-vlc
 pyreadline3

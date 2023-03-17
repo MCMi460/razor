@@ -88,4 +88,4 @@ class Source:
     def PLAY_TRACK(PROVIDER:object, id:str):
         if not id in PROVIDER.IDS:
             PROVIDER.DOWNLOAD_TRACK(id)
-        playsound.playsound(PROVIDER.DOWNLOAD_TRACK(id))
+        return vlc.MediaPlayer(PROVIDER.DOWNLOAD_TRACK(id))
