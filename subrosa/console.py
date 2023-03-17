@@ -118,7 +118,7 @@ class Console():
         else:
             return self._log('Failed to download %s' % id, Color.RED)
 
-    def play(self, provider:str = None, id:str = None):
+    def play(self, provider:str = None, id:str = None, log:bool = False):
         """
         Plays a track from an ID and a specified provider
         """
@@ -139,8 +139,10 @@ class Console():
         self.track['provider'] = provider
         self.track['media'] = media
         media.play()
-        track_info = provider.TRACK_INFO(id)
-        return self._log('Now playing %s from %s\nID: %s' % (track_info['title'], track_info['artist'], track_info['id']), Color.GREEN)
+        if log:
+            track_info = provider.TRACK_INFO(id)
+            return self._log('Now playing %s from %s\nID: %s' % (track_info['title'], track_info['artist'], track_info['id']), Color.GREEN)
+        return None
 
     def resume(self):
         return self.play(None, None)
@@ -165,7 +167,7 @@ class Console():
         else:
             return self._log('Track is already paused!', Color.RED)
 
-    def stop(self, log = True):
+    def stop(self, log:bool = True):
         """
         Stops the currently playing track
         """

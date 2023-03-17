@@ -2,10 +2,9 @@
 # Track Handling, Sub-Rosa
 
 # Imports
-import os, sys, multiprocessing
+import os, sys, random, traceback
 import youtube_dl
 import vlc
-import traceback
 if os.name == 'nt':
     import pyreadline3
 else:

@@ -10,3 +10,8 @@ QLabel {
 QSlider {
     background-color: transparent;
 }
+
+QPushButton {
+    background-color: transparent;
+    border: 0px;
+}
