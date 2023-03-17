@@ -174,8 +174,9 @@ class Console():
         if self.track == track:
             return self._log('Nothing is currently playing!', Color.RED) if log else None
         id = self.track['id']
-        self.track['media'].stop()
+        t = self.track['media']
         self.track = track.copy()
+        t.stop()
         return self._log('Successfully stopped %s' % id, Color.RED) if log else None
 
     def search(self, provider:str, *terms):

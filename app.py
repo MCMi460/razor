@@ -75,15 +75,18 @@ class GUI(Ui_MainWindow):
 
     def _constantPlay(self, provider, id):
         con.play(provider, id, False)
-        while not con.track['media'].is_playing():
+        while con.track['media'] and not con.track['media'].is_playing():
             pass
         while con.track['media'] and con.track['media'].get_state() in (vlc.State.Playing, vlc.State.Paused):
             pass
-        self.next()
+        if con.track['media']:
+            self.next()
+        else:
+            self.stop()
 
     def next(self):
-        if con.track['media'] and con.track['media'].get_state() in (vlc.State.Playing, vlc.State.Paused):
-            return self.stop()
+        if con.track['media']:
+            self.stop()
         if len(self.queue) > 0:
             self.backQueue.append(self.queue.pop(0))
         if len(self.queue) > 0:
@@ -94,11 +97,10 @@ class GUI(Ui_MainWindow):
             con.track['media'].set_time(0)
         elif con.track['media']:
             self.stop()
-            for i in range(2):
-                if len(self.backQueue) > 0:
-                    self.queue.insert(0, self.backQueue.pop(-1))
-            if len(self.queue) > 0:
-                self.play(self.queue[0])
+            if len(self.backQueue) > 0:
+                self.queue.insert(0, self.backQueue.pop(-1))
+                if len(self.queue) > 0:
+                    self.play(self.queue[0])
 
     def addToQueue(self, id:str):
         if not id:
@@ -107,7 +109,10 @@ class GUI(Ui_MainWindow):
         return self.queue[0]
 
     def stop(self):
-        con.stop()
+        try:
+            con.stop()
+        except:
+            pass
         self.playButton.setIcon(self.theme['playImage'])
 
     def pause(self):
