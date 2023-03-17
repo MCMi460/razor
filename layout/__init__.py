@@ -11,19 +11,20 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_body(object):
-    def setupUi(self, body):
-        body.setObjectName("body")
-        body.resize(960, 600)
-        body.setStyleSheet("background-color: #E2E2E2;\n"
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(960, 600)
+        MainWindow.setStyleSheet("background-color: #E2E2E2;\n"
 "color: #000;")
-        self.sidePlayer = QtWidgets.QGroupBox(body)
+        self.sidePlayer = QtWidgets.QGroupBox(MainWindow)
         self.sidePlayer.setGeometry(QtCore.QRect(0, 0, 117, 601))
         self.sidePlayer.setTitle("")
         self.sidePlayer.setObjectName("sidePlayer")
         self.progressBar = QtWidgets.QSlider(self.sidePlayer)
         self.progressBar.setGeometry(QtCore.QRect(10, 10, 31, 581))
         self.progressBar.setOrientation(QtCore.Qt.Vertical)
+        self.progressBar.setInvertedAppearance(True)
         self.progressBar.setObjectName("progressBar")
         self.playButton = QtWidgets.QPushButton(self.sidePlayer)
         self.playButton.setGeometry(QtCore.QRect(52, 278, 45, 45))
@@ -45,7 +46,7 @@ class Ui_body(object):
         self.loopButton.setGeometry(QtCore.QRect(57, 404, 35, 35))
         self.loopButton.setText("")
         self.loopButton.setObjectName("loopButton")
-        self.songMetadata = QtWidgets.QGroupBox(body)
+        self.songMetadata = QtWidgets.QGroupBox(MainWindow)
         self.songMetadata.setGeometry(QtCore.QRect(120, 0, 661, 81))
         self.songMetadata.setTitle("")
         self.songMetadata.setObjectName("songMetadata")
@@ -74,7 +75,7 @@ class Ui_body(object):
         self.volumeMin.setGeometry(QtCore.QRect(410, 30, 31, 20))
         self.volumeMin.setText("")
         self.volumeMin.setObjectName("volumeMin")
-        self.searchSection = QtWidgets.QGroupBox(body)
+        self.searchSection = QtWidgets.QGroupBox(MainWindow)
         self.searchSection.setGeometry(QtCore.QRect(780, 0, 181, 81))
         self.searchSection.setTitle("")
         self.searchSection.setObjectName("searchSection")
@@ -90,21 +91,21 @@ class Ui_body(object):
         self.searchInput.setGeometry(QtCore.QRect(32, 10, 121, 24))
         self.searchInput.setObjectName("searchInput")
 
-        self.retranslateUi(body)
-        QtCore.QMetaObject.connectSlotsByName(body)
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-    def retranslateUi(self, body):
+    def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        body.setWindowTitle(_translate("body", "Form"))
-        self.titleLabel.setText(_translate("body", "Title"))
-        self.uploaderLabel.setText(_translate("body", "Uploader"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Form"))
+        self.titleLabel.setText(_translate("MainWindow", "Title"))
+        self.uploaderLabel.setText(_translate("MainWindow", "Uploader"))
 
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    body = QtWidgets.QWidget()
-    ui = Ui_body()
-    ui.setupUi(body)
-    body.show()
+    MainWindow = QtWidgets.QWidget()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
     sys.exit(app.exec_())

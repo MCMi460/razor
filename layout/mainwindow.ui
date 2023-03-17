@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>body</class>
- <widget class="QWidget" name="body">
+ <class>MainWindow</class>
+ <widget class="QWidget" name="MainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -40,6 +40,9 @@ color: #000;</string>
     </property>
     <property name="orientation">
      <enum>Qt::Vertical</enum>
+    </property>
+    <property name="invertedAppearance">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QPushButton" name="playButton">
