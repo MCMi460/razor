@@ -1,0 +1,21 @@
+* {
+    background-color: #242424;
+    color: #FFF;
+}
+
+QGroupBox {
+    background-color: #2F2F2F;
+}
+
+QLabel {
+    background-color: transparent;
+}
+
+QSlider {
+    background-color: transparent;
+}
+
+QPushButton {
+    background-color: transparent;
+    border: 0px;
+}

@@ -5,33 +5,35 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-# QSS Stylesheet (redundancy check?)
-with open('./layout/styles.qss', 'r') as file:
-    qss = file.read()
-
 # Create GUI
 class GUI(Ui_MainWindow):
     def __init__(self, MainWindow):
         self.MainWindow = MainWindow
 
     def setup(self):
-        # Stylesheet
-        self.MainWindow.setStyleSheet(qss)
-
         # Images
         images = {
-            'playImage': 'layout/resources/!/play.png',
-            'pauseImage': 'layout/resources/!/pause.png',
-            'loopImage': 'layout/resources/!/loop.png',
+            'qss': '',
+            'playImage': 'play.png',
+            'pauseImage': 'pause.png',
+            'loopImage': 'loop.png',
         }
         self.lightImages = images.copy()
         self.darkImages = images.copy()
         for type in ('light', 'dark'):
-            for key in images:
-                getattr(self, type + 'Images')[key] = QIcon(images[key].replace('!', type))
+            # QSS Stylesheet (redundancy check?)
+            with open('layout/resources/%s/styles.qss' % type, 'r') as file:
+                getattr(self, type + 'Images')['qss'] = file.read()
+            for key in list(images.keys())[1:]:
+                getattr(self, type + 'Images')[key] = QIcon(('layout/resources/%s/' % type) + images[key])
+
+        self.theme = self.darkImages
+
+        # Stylesheet
+        self.MainWindow.setStyleSheet(self.theme['qss'])
 
         # Label images
-        self.playButton.setIcon(self.lightImages['playImage'])
+        self.playButton.setIcon(self.theme['playImage'])
         self.playButton.setIconSize(self.playButton.size())
 
         # Push Buttons
@@ -40,10 +42,10 @@ class GUI(Ui_MainWindow):
     def toggle(self):
         if con.track['media'] and con.track['media'].is_playing():
             self.pause()
-            self.playButton.setIcon(self.lightImages['playImage'])
+            self.playButton.setIcon(self.theme['playImage'])
         else:
             self.play()
-            self.playButton.setIcon(self.lightImages['pauseImage'])
+            self.playButton.setIcon(self.theme['pauseImage'])
 
     def play(self):
         if con.track['media']:
