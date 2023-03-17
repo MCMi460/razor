@@ -11,6 +11,13 @@ class Color:
     BLUE = '\033[94m'
     GREEN = '\033[92m'
 
+# Track format
+track = {
+    'id': '',
+    'provider': None,
+    'thread': None,
+}
+
 class Console():
     def __init__(self, *, prefix:str = '/'):
         self.prefix = prefix
@@ -25,10 +32,17 @@ class Console():
 
         self.tip = ('Type \'help\' to view the configuration menu', Color.YELLOW)
 
+        # Currently playing track:
+        self.track = track.copy()
+
+        self.youtube = Source.Youtube()
+
     def _main(self):
         self._log(*self.tip)
         while True:
-            userInput = input(Color.DEFAULT + '> ' + Color.PURPLE).strip().lower()
+            userInput = input(Color.DEFAULT + '> ' + Color.PURPLE).strip()
+            if list( userInput.lower().startswith(i) for i in ('download', 'play') ).count(True) == 0:
+                userInput = userInput.lower()
             args = userInput.split(' ')
 
             try:
@@ -51,11 +65,23 @@ class Console():
     def _missingSubcommand(self, args:list):
         return self._log('\'%s\' is not a supported subcommand of \'%s\'!' % (args[1], args[0]), Color.RED)
 
+    def _getProvider(self, provider:str) -> object:
+        if provider.strip().lower() in ('youtube', 'yt'):
+            provider = self.youtube
+        #elif ...
+        else:
+            raise Exception('provider unknown')
+        return provider
+
+    def _playFully(self, provider:object, id:str):
+        Source.PLAY_TRACK(provider, id)
+
     def exit(self):
         """
         Quits application
         """
         self._log('Exiting...', Color.RED)
+        self.stop(False)
         return os._exit(0)
 
     def help(self, command:str = None):
@@ -78,16 +104,56 @@ class Console():
         """
         Shows your currently playing song
         """
-        return self._log('lorem ipsum', Color.BLUE)
+        if self.track == track or not self.track['thread'].is_alive():
+            self.track = track.copy()
+            return self._log('There\'s no track playing right now!', Color.RED)
+        track_info = self.track['provider'].TRACK_INFO(self.track['id'])
+
+        return self._log('%s from %s\nID: %s' % (track_info['title'], track_info['artist'], track_info['id']), Color.YELLOW)
 
     def download(self, provider:str, id:str):
         """
         Downloads a track from a specified provider
         """
-        return
+        provider = self._getProvider(provider)
+        if provider.DOWNLOAD_TRACK(id):
+            return self._log('Successfully downloaded %s' % id, Color.GREEN)
+        else:
+            return self._log('Failed to download %s' % id, Color.RED)
 
     def play(self, provider:str, id:str):
         """
-        Plays a track from an ID
+        Plays a track from an ID and a specified provider
         """
-        return
+        if self.track != track:
+            self.stop()
+        provider = self._getProvider(provider)
+        thread = multiprocessing.Process(target = self._playFully, args = (provider, id,), daemon = True)
+        self.track['id'] = id
+        self.track['provider'] = provider
+        self.track['thread'] = thread
+        thread.start()
+        track_info = provider.TRACK_INFO(id)
+        return self._log('Now playing %s from %s\nID: %s' % (track_info['title'], track_info['artist'], track_info['id']), Color.GREEN)
+
+    def list(self, provider:str):
+        """
+        Shows a list of tracks from a provider
+        """
+        provider = self._getProvider(provider)
+        return self._log('\n'.join(provider.LIST_TRACKS()), Color.BLUE)
+
+    def stop(self, log = True):
+        """
+        Stops the currently playing track
+        """
+        if self.track == track:
+            return self._log('Nothing is currently playing!', Color.RED) if log else None
+        id = self.track['id']
+        if self.track['thread'].is_alive():
+            self.track['thread'].terminate()
+            self.track = track.copy()
+            return self._log('Successfully stopped %s' % id, Color.RED) if log else None
+        else:
+            self.track = track.copy()
+            return None

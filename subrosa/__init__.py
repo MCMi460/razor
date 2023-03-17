@@ -2,7 +2,7 @@
 # Track Handling, Sub-Rosa
 
 # Imports
-import os, sys, threading
+import os, sys, multiprocessing
 import youtube_dl
 import playsound
 import traceback
