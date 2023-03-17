@@ -6,7 +6,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 # QSS Stylesheet (redundancy check?)
-with open('styles.qss', 'r') as file:
+with open('./layout/styles.qss', 'r') as file:
     qss = file.read()
 
 # Create GUI
