@@ -118,7 +118,7 @@ class Console():
         else:
             return self._log('Failed to download %s' % id, Color.RED)
 
-    def play(self, provider:str = None, id:str = None, log:bool = False):
+    def play(self, provider:str = None, id:str = None, log:bool = True):
         """
         Plays a track from an ID and a specified provider
         """
@@ -132,7 +132,7 @@ class Console():
         elif provider and not id:
             return self._log('Please enter both a provider and an ID', Color.RED)
         provider = self._getProvider(provider)
-        if self.track != track:
+        if self.track['id'] != track['id']:
             self.stop()
         media = Source.PLAY_TRACK(provider, id)
         self.track['id'] = id

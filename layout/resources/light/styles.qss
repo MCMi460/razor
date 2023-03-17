@@ -3,6 +3,11 @@
     color: #000;
 }
 
+QGroupBox {
+    background-color: #CACACA;
+    border: 0px;
+}
+
 QLabel {
     background-color: transparent;
 }

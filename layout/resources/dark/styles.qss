@@ -5,6 +5,7 @@
 
 QGroupBox {
     background-color: #2F2F2F;
+    border: 0px;
 }
 
 QLabel {
