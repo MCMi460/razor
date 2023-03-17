@@ -1,0 +1,12 @@
+* {
+    background-color: #E2E2E2;
+    color: #000;
+}
+
+QLabel {
+    background-color: transparent;
+}
+
+QSlider {
+    background-color: transparent;
+}

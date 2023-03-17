@@ -15,10 +15,8 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(960, 600)
-        MainWindow.setStyleSheet("background-color: #E2E2E2;\n"
-"color: #000;")
         self.sidePlayer = QtWidgets.QGroupBox(MainWindow)
-        self.sidePlayer.setGeometry(QtCore.QRect(0, 0, 117, 601))
+        self.sidePlayer.setGeometry(QtCore.QRect(0, 0, 120, 601))
         self.sidePlayer.setTitle("")
         self.sidePlayer.setObjectName("sidePlayer")
         self.progressBar = QtWidgets.QSlider(self.sidePlayer)
