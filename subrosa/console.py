@@ -157,3 +157,21 @@ class Console():
         else:
             self.track = track.copy()
             return None
+
+    def search(self, provider:str, *terms):
+        """
+        Searches for IDs that match a search term
+        """
+        provider = self._getProvider(provider)
+        results = provider.SEARCH(' '.join(terms))
+        response = []
+        for result in results:
+            if not 'Music' in result['categories']:
+                print(result['title'])
+                continue
+            response.append(
+            ('Title: %s\n'
+            + 'Uploader: %s\n'
+            + 'ID: %s') % (result['title'], result['uploader'], result['id'])
+            )
+        return self._log('\n---\n'.join(response[0:5]), Color.BLUE)

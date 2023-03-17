@@ -24,6 +24,7 @@ class Source:
                 }],
                 'outtmpl': './sources/youtube/%(id)s.%(ext)s',
                 'quiet': True,
+                'noplaylist': True,
             }
 
             fd.createDirectory('youtube')
@@ -78,6 +79,11 @@ class Source:
                 except:
                     pass
             return response
+
+        def SEARCH(self, terms:str, cutoff:int = 10) -> list:
+            assert isinstance(terms, str) and isinstance(cutoff, int)
+            with youtube_dl.YoutubeDL(self.ydl_opts) as ydl:
+                return ydl.extract_info('ytsearch%s:%s' % (cutoff, terms), download = False)['entries']
 
     def PLAY_TRACK(PROVIDER:object, id:str):
         if not id in PROVIDER.IDS:
