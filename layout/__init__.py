@@ -82,6 +82,13 @@ class Ui_body(object):
         self.searchBox.setGeometry(QtCore.QRect(10, 20, 161, 41))
         self.searchBox.setTitle("")
         self.searchBox.setObjectName("searchBox")
+        self.searchIcon = QtWidgets.QLabel(self.searchBox)
+        self.searchIcon.setGeometry(QtCore.QRect(10, 13, 16, 16))
+        self.searchIcon.setText("")
+        self.searchIcon.setObjectName("searchIcon")
+        self.searchInput = QtWidgets.QLineEdit(self.searchBox)
+        self.searchInput.setGeometry(QtCore.QRect(32, 10, 121, 24))
+        self.searchInput.setObjectName("searchInput")
 
         self.retranslateUi(body)
         QtCore.QMetaObject.connectSlotsByName(body)

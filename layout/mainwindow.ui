@@ -228,6 +228,29 @@ color: #000;</string>
     <property name="title">
      <string/>
     </property>
+    <widget class="QLabel" name="searchIcon">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>13</y>
+       <width>16</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="searchInput">
+     <property name="geometry">
+      <rect>
+       <x>32</x>
+       <y>10</y>
+       <width>121</width>
+       <height>24</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
   </widget>
  </widget>
