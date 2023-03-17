@@ -2,7 +2,7 @@
 # Track Handling, Sub-Rosa
 
 # Imports
-import os, sys, random, traceback, threading, time
+import os, sys, random, traceback, threading, time, json
 import youtube_dl
 import vlc
 if os.name == 'nt':

@@ -14,6 +14,8 @@ class Source:
             self.IDS = [
                 # Default:
                 # NONE
+                # Format:
+                # track_info
             ]
             self.ydl_opts = {
                 'format': 'bestaudio/best',
@@ -29,30 +31,36 @@ class Source:
 
             fd.createDirectory('youtube')
             if fd.isFile('./sources/youtube/IDS.txt'):
-                self.IDS = fd.readFile('youtube/IDS.txt').split('\n')
-            self.UPDATE_TITLE_LIST()
+                self.IDS = [ json.loads(a) for a in fd.readFile('youtube/IDS.txt').split('\n') ]
+            self.CHECK_TITLE_LIST()
 
         def UPDATE_TITLE_LIST(self) -> None:
-            fd.createFile('youtube/IDS.txt', '\n'.join(self.IDS))
+            fd.createFile('youtube/IDS.txt', '\n'.join(( json.dumps(a) for a in self.IDS )))
 
         def CHECK_TITLE_LIST(self) -> None:
-            for id in self.IDS:
-                if not fd.isFile('./sources/youtube/%s.mp3' % id):
-                    self.IDS.remove(id)
+            for song in self.IDS:
+                if not fd.isFile('./sources/youtube/%s.mp3' % song['id']):
+                    self.IDS.remove(song)
             self.UPDATE_TITLE_LIST()
 
         ### Standardized methods ###
         def DOWNLOAD_TRACK(self, id:str) -> str:
             assert isinstance(id, str)
             self.CHECK_TITLE_LIST()
-            if id in self.IDS:
+            if id in ( a['id'] for a in self.IDS ):
                 return os.path.abspath('./sources/youtube/%s.mp3' % id)
             url = 'https://youtube.com/watch?v=%s' % id
+            response = track_info.copy()
+            response['id'] = id
             for i in range(2):
                 try:
                     with youtube_dl.YoutubeDL(self.ydl_opts) as ydl:
-                        ydl.download([url])
-                    self.IDS.append(id)
+                        info = ydl.extract_info(url, download = True)
+                        response['id'] = info.get('id')
+                        response['title'] = info.get('title')
+                        response['artist'] = info.get('uploader')
+                        response['thumbnail'] = info.get('thumbnail')
+                        self.IDS.append(response)
                     self.UPDATE_TITLE_LIST()
                     return os.path.abspath('./sources/youtube/%s.mp3' % id)
                 except:
@@ -60,10 +68,13 @@ class Source:
             raise Exception('failed to download track')
 
         def LIST_TRACKS(self) -> list:
-            return self.IDS
+            return list( a['id'] for a in self.IDS )
 
         def TRACK_INFO(self, id:str) -> dict:
             assert isinstance(id, str)
+            for a in self.IDS:
+                if id == a['id']:
+                    return a
             url = 'https://youtube.com/watch?v=%s' % id
             response = track_info.copy()
             response['id'] = id

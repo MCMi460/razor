@@ -121,6 +121,13 @@ class GUI(Ui_MainWindow):
     def resume(self):
         con.resume()
 
+    def cooldown(self, element, sec:int):
+        def wait():
+            element.setEnabled(False)
+            time.sleep(sec)
+            element.setEnabled(True)
+        threading.Thread(target = wait, daemon = True).start()
+
 if __name__ == '__main__':
     # Begin main thread for user
     con = Console()
