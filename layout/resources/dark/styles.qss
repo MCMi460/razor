@@ -45,7 +45,7 @@ QSlider::handle:horizontal {
 
 QSlider::add-page {
     border-radius: 5px;
-    background: #A00000;
+    background-color: #242424;
 }
 QSlider::add-page:vertical {
     margin: 0px 3px 0px 3px;
@@ -56,7 +56,7 @@ QSlider::add-page:horizontal {
 
 QSlider::sub-page {
     border-radius: 5px;
-    background: #A00000;
+    background-color: #A00000;
 }
 QSlider::sub-page:vertical {
     margin: 0px 3px 0px 3px;

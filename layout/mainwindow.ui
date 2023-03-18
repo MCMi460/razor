@@ -178,8 +178,20 @@
       <height>21</height>
      </rect>
     </property>
+    <property name="minimum">
+     <number>30</number>
+    </property>
+    <property name="maximum">
+     <number>180</number>
+    </property>
+    <property name="value">
+     <number>100</number>
+    </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="tickInterval">
+     <number>1</number>
     </property>
    </widget>
    <widget class="QLabel" name="volumeMax">

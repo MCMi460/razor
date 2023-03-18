@@ -5,7 +5,7 @@
 import os, sys, random, traceback, threading, time, json
 import youtube_dl
 import vlc
-import requests
+import pypresence
 if os.name == 'nt':
     import pyreadline3
 else:

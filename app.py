@@ -55,6 +55,7 @@ class GUI(Ui_MainWindow):
         self.themeButton.clicked.connect(self.toggleTheme)
 
         self.progressBar.sliderReleased.connect(self.updateDuration)
+        self.volumeSlider.sliderReleased.connect(self.updateVolume)
 
     def toggle(self):
         if con.track['media'] and con.track['media'].is_playing():
@@ -81,6 +82,7 @@ class GUI(Ui_MainWindow):
 
     def _constantPlay(self, provider, id):
         con.play(provider, id, False)
+        con.track['media'].audio_set_volume(self.volumeSlider.value())
         while con.track['media'] and not con.track['media'].is_playing():
             pass
         threading.Thread(target = self.updateMeta, args = (id,), daemon = True).start()
@@ -210,7 +212,10 @@ class GUI(Ui_MainWindow):
         self.forwardButton.setIcon(self.theme['nextImage'])
         self.forwardButton.setIconSize(self.forwardButton.size())
 
-        self.loopButton.setIcon(self.theme['loopImage'])
+        key = 'loopImage'
+        if self.looping:
+            key = 'loopActivatedImage'
+        self.loopButton.setIcon(self.theme[key])
         self.loopButton.setIconSize(self.loopButton.size())
         self.shuffleButton.setIcon(self.theme['shuffleImage'])
         self.shuffleButton.setIconSize(self.shuffleButton.size())
@@ -224,6 +229,10 @@ class GUI(Ui_MainWindow):
             self.updateMeta()
 
         ### STYLESHEET END ###
+
+    def updateVolume(self):
+        if con.track['media']:
+            con.track['media'].audio_set_volume(self.volumeSlider.value())
 
 if __name__ == '__main__':
     # Begin main thread for user
