@@ -31,7 +31,10 @@ class Source:
 
             fd.createDirectory('youtube')
             if fd.isFile('./sources/youtube/IDS.txt'):
-                self.IDS = [ json.loads(a) for a in fd.readFile('youtube/IDS.txt').split('\n') ]
+                try:
+                    self.IDS = [ json.loads(a) for a in fd.readFile('youtube/IDS.txt').split('\n') ]
+                except:
+                    self.IDS = []
             self.CHECK_TITLE_LIST()
 
         def UPDATE_TITLE_LIST(self) -> None:

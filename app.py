@@ -69,7 +69,11 @@ class GUI(Ui_MainWindow):
         elif con.track == track:
             con.track['provider'] = True
             if len(self.queue) == 0:
-                self.addToQueue(id)
+                try:
+                    self.addToQueue(id)
+                except:
+                    con.track['provider'] = None
+                    return
             if not id:
                 id = self.queue[0]
             threading.Thread(target = self._constantPlay, args = (self.providerName, id,), daemon = True).start()
@@ -116,6 +120,9 @@ class GUI(Ui_MainWindow):
 
     def addToQueue(self, id:str):
         if not id:
+            tracks = self.provider.LIST_TRACKS()
+            if len(tracks) == 0:
+                raise Exception('no songs!')
             id = random.choice(self.provider.LIST_TRACKS())
         self.queue.append(id)
         return self.queue[0]
