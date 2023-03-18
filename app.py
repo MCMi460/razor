@@ -63,11 +63,13 @@ class GUI(Ui_MainWindow):
 
         self.thumbnailLabel.setScaledContents(True)
 
-        # Push Buttons
+        # Connections
         self.playButton.clicked.connect(self.toggle)
         self.forwardButton.clicked.connect(self.next)
         self.backButton.clicked.connect(self.back)
         self.loopButton.clicked.connect(self.loop)
+
+        self.progressBar.sliderReleased.connect(self.updateDuration)
 
         # Function calls
         self.updateMeta()
@@ -96,6 +98,9 @@ class GUI(Ui_MainWindow):
         while con.track['media'] and not con.track['media'].is_playing():
             pass
         threading.Thread(target = self.updateMeta, args = (id,), daemon = True).start()
+        self.progressBar.setValue(0)
+        self.progressBar.setMaximum(con.track['media'].get_length())
+        threading.Thread(target = self.updateProgressBar, daemon = True).start()
         while con.track['media'] and con.track['media'].get_state() in (vlc.State.Playing, vlc.State.Paused):
             pass
         if con.track['media']:
@@ -137,6 +142,7 @@ class GUI(Ui_MainWindow):
             con.stop()
         except:
             pass
+        self.progressBar.setValue(0)
         self.playButton.setIcon(self.theme['playImage'])
         self.updateMeta()
 
@@ -178,6 +184,17 @@ class GUI(Ui_MainWindow):
             pix = QPixmap()
             pix.loadFromData(requests.get(info['thumbnail']).content)
         self.thumbnailLabel.setPixmap(pix)
+
+    def updateProgressBar(self):
+        while con.track['media'] and con.track['media'].get_state() in (vlc.State.Playing, vlc.State.Paused):
+            self.progressBar.setValue(con.track['media'].get_time())
+            time.sleep(1)
+
+    def updateDuration(self):
+        if con.track['media']:
+            con.track['media'].set_time(self.progressBar.value())
+        else:
+            self.stop()
 
 if __name__ == '__main__':
     # Begin main thread for user
