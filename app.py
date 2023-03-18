@@ -42,6 +42,7 @@ class GUI(Ui_MainWindow):
             'nextImage': 'skip.png',
             'modeImage': 'mode.png',
             'queueImage': 'queue.png',
+            'searchImage': 'search.png',
         }
         pixmaps = {
             'blankThumbnail': 'thumbnail.png',
@@ -286,6 +287,8 @@ class GUI(Ui_MainWindow):
 
         self.themeButton.setIcon(self.theme['modeImage'])
         self.themeButton.setIconSize(self.themeButton.size())
+        self.searchButton.setIcon(self.theme['searchImage'])
+        self.searchButton.setIconSize(self.searchButton.size())
 
         self.thumbnailLabel.setScaledContents(True)
 

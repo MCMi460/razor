@@ -90,3 +90,7 @@ QScrollArea {
 #queueContents {
     background-color: #404040;
 }
+
+QGroupBox#searchSection {
+    background-color: #404040;
+}
