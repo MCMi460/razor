@@ -142,7 +142,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Title</string>
+     <string/>
     </property>
    </widget>
    <widget class="QLabel" name="uploaderLabel">
@@ -160,16 +160,16 @@
      </font>
     </property>
     <property name="text">
-     <string>Uploader</string>
+     <string/>
     </property>
    </widget>
    <widget class="QSlider" name="volumeSlider">
     <property name="geometry">
      <rect>
       <x>450</x>
-      <y>31</y>
+      <y>30</y>
       <width>160</width>
-      <height>16</height>
+      <height>21</height>
      </rect>
     </property>
     <property name="orientation">

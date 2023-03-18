@@ -2,5 +2,6 @@
 
 youtube-dl
 python-vlc
+requests
 pyreadline3
 pyqt5

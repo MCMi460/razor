@@ -54,15 +54,17 @@ class Ui_MainWindow(object):
         self.thumbnailLabel.setObjectName("thumbnailLabel")
         self.titleLabel = QtWidgets.QLabel(self.songMetadata)
         self.titleLabel.setGeometry(QtCore.QRect(130, 20, 231, 16))
+        self.titleLabel.setText("")
         self.titleLabel.setObjectName("titleLabel")
         self.uploaderLabel = QtWidgets.QLabel(self.songMetadata)
         self.uploaderLabel.setGeometry(QtCore.QRect(130, 40, 231, 16))
         font = QtGui.QFont()
         font.setPointSize(11)
         self.uploaderLabel.setFont(font)
+        self.uploaderLabel.setText("")
         self.uploaderLabel.setObjectName("uploaderLabel")
         self.volumeSlider = QtWidgets.QSlider(self.songMetadata)
-        self.volumeSlider.setGeometry(QtCore.QRect(450, 31, 160, 16))
+        self.volumeSlider.setGeometry(QtCore.QRect(450, 30, 160, 21))
         self.volumeSlider.setOrientation(QtCore.Qt.Horizontal)
         self.volumeSlider.setObjectName("volumeSlider")
         self.volumeMax = QtWidgets.QLabel(self.songMetadata)
@@ -95,8 +97,6 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Form"))
-        self.titleLabel.setText(_translate("MainWindow", "Title"))
-        self.uploaderLabel.setText(_translate("MainWindow", "Uploader"))
 
 
 if __name__ == "__main__":

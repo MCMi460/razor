@@ -18,22 +18,26 @@ class GUI(Ui_MainWindow):
 
     def setup(self):
         # Images
-        images = {
-            'qss': '',
+        icons = {
             'playImage': 'play.png',
             'pauseImage': 'pause.png',
             'loopImage': 'loop.png',
             'backImage': 'rewind.png',
             'nextImage': 'skip.png',
         }
-        self.lightImages = images.copy()
-        self.darkImages = images.copy()
+        pixmaps = {
+            'blankThumbnail': 'thumbnail.png',
+        }
+        self.lightImages = icons.copy() | pixmaps.copy()
+        self.darkImages = icons.copy() | pixmaps.copy()
         for type in ('light', 'dark'):
             # QSS Stylesheet (redundancy check?)
             with open('layout/resources/%s/styles.qss' % type, 'r') as file:
                 getattr(self, type + 'Images')['qss'] = file.read()
-            for key in list(images.keys())[1:]:
-                getattr(self, type + 'Images')[key] = QIcon(('layout/resources/%s/' % type) + images[key])
+            for key in list(icons.keys()):
+                getattr(self, type + 'Images')[key] = QIcon(('layout/resources/%s/' % type) + icons[key])
+            for key in list(pixmaps.keys()):
+                getattr(self, type + 'Images')[key] = QPixmap(('layout/resources/%s/' % type) + pixmaps[key])
 
         self.theme = self.darkImages
 
@@ -49,10 +53,15 @@ class GUI(Ui_MainWindow):
         self.forwardButton.setIcon(self.theme['nextImage'])
         self.forwardButton.setIconSize(self.forwardButton.size())
 
+        self.thumbnailLabel.setScaledContents(True)
+
         # Push Buttons
         self.playButton.clicked.connect(self.toggle)
         self.forwardButton.clicked.connect(self.next)
         self.backButton.clicked.connect(self.back)
+
+        # Function calls
+        self.updateMeta()
 
     def toggle(self):
         if con.track['media'] and con.track['media'].is_playing():
@@ -77,6 +86,7 @@ class GUI(Ui_MainWindow):
         con.play(provider, id, False)
         while con.track['media'] and not con.track['media'].is_playing():
             pass
+        threading.Thread(target = self.updateMeta, args = (id,), daemon = True).start()
         while con.track['media'] and con.track['media'].get_state() in (vlc.State.Playing, vlc.State.Paused):
             pass
         if con.track['media']:
@@ -97,10 +107,11 @@ class GUI(Ui_MainWindow):
             con.track['media'].set_time(0)
         elif con.track['media']:
             self.stop()
-            if len(self.backQueue) > 0:
-                self.queue.insert(0, self.backQueue.pop(-1))
-                if len(self.queue) > 0:
-                    self.play(self.queue[0])
+        if len(self.backQueue) > 0:
+            self.queue.insert(0, self.backQueue.pop(-1))
+            if len(self.queue) > 0:
+                self.play(self.queue[0])
+
 
     def addToQueue(self, id:str):
         if not id:
@@ -114,6 +125,7 @@ class GUI(Ui_MainWindow):
         except:
             pass
         self.playButton.setIcon(self.theme['playImage'])
+        self.updateMeta()
 
     def pause(self):
         con.pause()
@@ -127,6 +139,25 @@ class GUI(Ui_MainWindow):
             time.sleep(sec)
             element.setEnabled(True)
         threading.Thread(target = wait, daemon = True).start()
+
+    def updateMeta(self, id:str = None):
+        if not id:
+            info = {
+                'title': '',
+                'artist': '',
+                'thumbnail': '',
+                'id': '',
+            }
+        else:
+            info = self.provider.TRACK_INFO(con.track['id'])
+        self.titleLabel.setText(info['title'])
+        self.uploaderLabel.setText(info['artist'])
+        if not id:
+            pix = self.theme['blankThumbnail']
+        else:
+            pix = QPixmap()
+            pix.loadFromData(requests.get(info['thumbnail']).content)
+        self.thumbnailLabel.setPixmap(pix)
 
 if __name__ == '__main__':
     # Begin main thread for user
