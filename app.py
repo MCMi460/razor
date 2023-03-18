@@ -171,8 +171,7 @@ class GUI(Ui_MainWindow):
         if not id:
             pix = self.theme['blankThumbnail']
         else:
-            pix = QPixmap()
-            pix.loadFromData(requests.get(info['thumbnail']).content)
+            pix = QPixmap('sources/%s/%s.jpg' % (self.providerName, id))
         self.thumbnailLabel.setPixmap(pix)
 
     def updateProgressBar(self):

@@ -27,6 +27,7 @@ class Source:
                 'outtmpl': './sources/youtube/%(id)s.%(ext)s',
                 'quiet': True,
                 'noplaylist': True,
+                'writethumbnail': True,
             }
 
             fd.createDirectory('youtube')
