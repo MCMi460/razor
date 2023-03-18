@@ -101,6 +101,8 @@ class Ui_MainWindow(object):
         self.searchButton.setObjectName("searchButton")
         self.musicArea = QtWidgets.QScrollArea(MainWindow)
         self.musicArea.setGeometry(QtCore.QRect(120, 80, 841, 521))
+        self.musicArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.musicArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.musicArea.setWidgetResizable(True)
         self.musicArea.setObjectName("musicArea")
         self.musicContents = QtWidgets.QWidget()

@@ -77,6 +77,9 @@ class Source:
         def LIST_TRACKS(self) -> list:
             return list( a['id'] for a in self.IDS )
 
+        def LIST_TRACKS_INFO(self) -> list:
+            return self.IDS
+
         def TRACK_INFO(self, id:str) -> dict:
             assert isinstance(id, str)
             for a in self.IDS:

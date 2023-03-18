@@ -13,7 +13,7 @@ class GUI(Ui_MainWindow):
         # Abstract variables
         self.providerName = 'youtube'
         self.provider = con._getProvider(self.providerName)
-        self.queue = ['gEbRqpFkTBk','-SyBR-M2YvU',]
+        self.queue = []
         self.backQueue = []
         self.looping = False
 
@@ -30,6 +30,10 @@ class GUI(Ui_MainWindow):
         self.queueLayout = QGridLayout()
         self.queueContents.setLayout(self.queueLayout)
         self.queueUpdate()
+
+        # Music Area
+        self.musicLayout = QGridLayout()
+        self.musicContents.setLayout(self.musicLayout)
 
         # Images
         icons = {
@@ -62,8 +66,6 @@ class GUI(Ui_MainWindow):
 
         self.theme = self.darkImages
 
-        self.themeUpdate()
-
         # Connections
         self.playButton.clicked.connect(self.toggle)
         self.forwardButton.clicked.connect(lambda event : self.next())
@@ -80,6 +82,9 @@ class GUI(Ui_MainWindow):
 
         self.progressBar.sliderReleased.connect(self.updateDuration)
         self.volumeSlider.valueChanged.connect(self.updateVolume)
+
+        self.themeUpdate()
+        self.fillMainWindow(self.provider.LIST_TRACKS_INFO())
 
     def toggle(self):
         if con.track['media'] and con.track['media'].is_playing():
@@ -150,15 +155,18 @@ class GUI(Ui_MainWindow):
                 self.play(self.queue[0])
             self.queueUpdate(True)
 
-    def addToQueue(self, id:str):
+    def addToQueue(self, id:str, pos:int = None):
         if not id:
             tracks = self.provider.LIST_TRACKS()
             if len(tracks) == 0:
                 raise Exception('no songs!')
             id = random.choice(self.provider.LIST_TRACKS())
-        self.queue.append(id)
+        if not pos:
+            self.queue.append(id)
+        else:
+            self.queue.insert(pos, id)
         self.queueUpdate()
-        return self.queue[0]
+        return pos if len(self.queue) > 1 else 0
 
     def stop(self):
         try:
@@ -347,6 +355,31 @@ class GUI(Ui_MainWindow):
             for i in range(1, len(self.queue)):
                 self.queue[i] = list[i - 1]
             self.queueUpdate()
+
+    def fillMainWindow(self, songs:list):
+        self.emptyLayout(self.musicLayout)
+        y = 16
+        rows = math.ceil(len(songs) / 4)
+        for row in range(rows):
+            overlay = QGroupBox()
+            overlay.setStyleSheet('background-color: transparent;')
+            overlay.move(16, y)
+            overlay.setFixedSize(809, 107)
+            for i in range(4):
+                n = 4 * row + i
+                if n > len(songs) - 1:
+                    break
+                thumbnail = QLabel(overlay)
+                thumbnail.move(i * 191 + 15 * i, 0)
+                thumbnail.setFixedSize(191, 107)
+                thumbnail.setScaledContents(True)
+                pix = QPixmap('sources/%s/%s.jpg' % (self.providerName, songs[n]['id']))
+                thumbnail.setPixmap(pix)
+                thumbnail.mouseReleaseEvent = lambda event, n=songs[n] : self.next(self.addToQueue(n['id'], 1), True)
+            self.musicLayout.addWidget(overlay)
+            y += 122
+        if rows <= 4:
+            self.musicLayout.addItem(QSpacerItem(0, 107 * (4 - rows) + 15 * (4 - rows)))
 
 if __name__ == '__main__':
     # Begin main thread for user

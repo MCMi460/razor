@@ -5,7 +5,7 @@
 version = 0.3
 
 # Imports
-import os, sys, random, traceback, threading, time, json, copy
+import os, sys, random, traceback, threading, time, json, math
 import youtube_dl
 import vlc
 import pypresence
