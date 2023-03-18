@@ -65,7 +65,7 @@ class GUI(Ui_MainWindow):
 
         # Connections
         self.playButton.clicked.connect(self.toggle)
-        self.forwardButton.clicked.connect(self.next)
+        self.forwardButton.clicked.connect(lambda event : self.next())
         self.backButton.clicked.connect(self.back)
         self.loopButton.clicked.connect(self.loop)
         self.themeButton.clicked.connect(self.toggleTheme)
@@ -120,12 +120,11 @@ class GUI(Ui_MainWindow):
         else:
             self.stop()
 
-    def next(self, distance = 0):
-        print(distance)
+    def next(self, distance = 1, clicked = False):
         if con.track['media']:
             self.stop()
-        if not self.looping or distance > 0:
-            for i in range(distance + 1):
+        if not self.looping or clicked:
+            for i in range(distance):
                 if len(self.queue) > 0:
                     self.backQueue.append(self.queue.pop(0))
             if len(self.queue) > 0:
@@ -136,7 +135,7 @@ class GUI(Ui_MainWindow):
         self.underLyingButton.clicked.emit()
 
     def back(self):
-        if con.track['media'] and ( (con.track['media'].get_time() > 2000 and con.track['media'].get_length() > 3000) or self.looping ):
+        if con.track['media'] and ( (con.track['media'].get_time() > 2000 and con.track['media'].get_length() > 3000) ):
             con.track['media'].set_time(0)
             self.queueUpdate(True)
             return
@@ -315,8 +314,7 @@ class GUI(Ui_MainWindow):
             start = 1
             if not con.track['media'] and not forceStart:
                 start = 0
-            distance = start
-            for song in self.queue[start:]:
+            for i in range(start, len(self.queue)):
                 group = QGroupBox()
                 group.move(0, y)
                 group.setFixedSize(119, 71)
@@ -324,13 +322,11 @@ class GUI(Ui_MainWindow):
                 label = QLabel(group)
                 label.move(5,5)
                 label.resize(109, 61)
-                pix = QPixmap('sources/%s/%s.jpg' % (self.providerName, song))
+                pix = QPixmap('sources/%s/%s.jpg' % (self.providerName, self.queue[i]))
                 label.setPixmap(pix)
                 label.setScaledContents(True)
-                print('h', str(distance))
-                label.mouseReleaseEvent = lambda a : self.next(int(str(distance)))
+                label.mouseReleaseEvent = lambda event, i=i : self.next(i, True)
                 self.queueLayout.addWidget(group)
-                distance += 1
                 y += 80
             self.queueLayout.addItem(QSpacerItem(0,521))
 
