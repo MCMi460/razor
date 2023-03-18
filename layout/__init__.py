@@ -100,6 +100,10 @@ class Ui_MainWindow(object):
         self.musicContents.setGeometry(QtCore.QRect(0, 0, 839, 519))
         self.musicContents.setObjectName("musicContents")
         self.musicArea.setWidget(self.musicContents)
+        self.themeButton = QtWidgets.QPushButton(MainWindow)
+        self.themeButton.setGeometry(QtCore.QRect(899, 543, 51, 51))
+        self.themeButton.setText("")
+        self.themeButton.setObjectName("themeButton")
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)

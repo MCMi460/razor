@@ -11,6 +11,11 @@
     color: #000;
 }
 
+QPushButton#themeButton {
+    border-radius: 10px;
+    background-color: #CACACA;
+}
+
 QGroupBox {
     background-color: #CACACA;
     border: 0px;

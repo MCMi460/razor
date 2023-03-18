@@ -27,6 +27,7 @@ class GUI(Ui_MainWindow):
             'shuffleImage': 'shuffle.png',
             'backImage': 'rewind.png',
             'nextImage': 'skip.png',
+            'modeImage': 'mode.png',
         }
         pixmaps = {
             'blankThumbnail': 'thumbnail.png',
@@ -44,35 +45,16 @@ class GUI(Ui_MainWindow):
 
         self.theme = self.darkImages
 
-        # Stylesheet
-        self.MainWindow.setStyleSheet(self.theme['qss'])
-
-        # Label images
-        self.playButton.setIcon(self.theme['playImage'])
-        self.playButton.setIconSize(self.playButton.size())
-
-        self.backButton.setIcon(self.theme['backImage'])
-        self.backButton.setIconSize(self.backButton.size())
-        self.forwardButton.setIcon(self.theme['nextImage'])
-        self.forwardButton.setIconSize(self.forwardButton.size())
-
-        self.loopButton.setIcon(self.theme['loopImage'])
-        self.loopButton.setIconSize(self.loopButton.size())
-        self.shuffleButton.setIcon(self.theme['shuffleImage'])
-        self.shuffleButton.setIconSize(self.shuffleButton.size())
-
-        self.thumbnailLabel.setScaledContents(True)
+        self.themeUpdate()
 
         # Connections
         self.playButton.clicked.connect(self.toggle)
         self.forwardButton.clicked.connect(self.next)
         self.backButton.clicked.connect(self.back)
         self.loopButton.clicked.connect(self.loop)
+        self.themeButton.clicked.connect(self.toggleTheme)
 
         self.progressBar.sliderReleased.connect(self.updateDuration)
-
-        # Function calls
-        self.updateMeta()
 
     def toggle(self):
         if con.track['media'] and con.track['media'].is_playing():
@@ -196,6 +178,46 @@ class GUI(Ui_MainWindow):
             con.track['media'].set_time(self.progressBar.value())
         else:
             self.stop()
+
+    def toggleTheme(self):
+        if self.theme == self.lightImages:
+            self.theme = self.darkImages
+        else:
+            self.theme = self.lightImages
+
+        self.themeUpdate()
+
+    def themeUpdate(self):
+        ### STYLESHEET START ###
+
+        self.MainWindow.setStyleSheet(self.theme['qss'])
+
+        # Label images
+        if con.track['media'] and con.track['media'].is_playing():
+            self.playButton.setIcon(self.theme['pauseImage'])
+        else:
+            self.playButton.setIcon(self.theme['playImage'])
+        self.playButton.setIconSize(self.playButton.size())
+
+        self.backButton.setIcon(self.theme['backImage'])
+        self.backButton.setIconSize(self.backButton.size())
+        self.forwardButton.setIcon(self.theme['nextImage'])
+        self.forwardButton.setIconSize(self.forwardButton.size())
+
+        self.loopButton.setIcon(self.theme['loopImage'])
+        self.loopButton.setIconSize(self.loopButton.size())
+        self.shuffleButton.setIcon(self.theme['shuffleImage'])
+        self.shuffleButton.setIconSize(self.shuffleButton.size())
+
+        self.themeButton.setIcon(self.theme['modeImage'])
+        self.themeButton.setIconSize(self.themeButton.size())
+
+        self.thumbnailLabel.setScaledContents(True)
+
+        if not con.track['media']:
+            self.updateMeta()
+
+        ### STYLESHEET END ###
 
 if __name__ == '__main__':
     # Begin main thread for user
