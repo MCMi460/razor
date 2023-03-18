@@ -72,6 +72,7 @@ class GUI(Ui_MainWindow):
         self.volumeMax.mouseReleaseEvent = lambda a : self.volumeSlider.setValue(self.volumeSlider.value() + 20)
         self.volumeMin.mouseReleaseEvent = lambda a : self.volumeSlider.setValue(self.volumeSlider.value() - 20)
         self.queueButton.clicked.connect(self.toggleQueue)
+        self.shuffleButton.clicked.connect(self.shuffle)
 
         self.underLyingButton = QPushButton()
         self.underLyingButton.clicked.connect(lambda a : self.queueUpdate(True))
@@ -335,6 +336,14 @@ class GUI(Ui_MainWindow):
             self.queueArea.hide()
         else:
             self.queueArea.show()
+
+    def shuffle(self):
+        if len(self.queue) > 1:
+            list = self.queue[1:]
+            random.shuffle(list)
+            for i in range(1, len(self.queue)):
+                self.queue[i] = list[i - 1]
+            self.queueUpdate()
 
 if __name__ == '__main__':
     # Begin main thread for user
