@@ -15,6 +15,7 @@ class GUI(Ui_MainWindow):
         self.provider = con._getProvider(self.providerName)
         self.queue = ['gEbRqpFkTBk','-SyBR-M2YvU',]
         self.backQueue = []
+        self.looping = False
 
     def setup(self):
         # Images
@@ -22,6 +23,8 @@ class GUI(Ui_MainWindow):
             'playImage': 'play.png',
             'pauseImage': 'pause.png',
             'loopImage': 'loop.png',
+            'loopActivatedImage': 'loop2.png',
+            'shuffleImage': 'shuffle.png',
             'backImage': 'rewind.png',
             'nextImage': 'skip.png',
         }
@@ -53,12 +56,18 @@ class GUI(Ui_MainWindow):
         self.forwardButton.setIcon(self.theme['nextImage'])
         self.forwardButton.setIconSize(self.forwardButton.size())
 
+        self.loopButton.setIcon(self.theme['loopImage'])
+        self.loopButton.setIconSize(self.loopButton.size())
+        self.shuffleButton.setIcon(self.theme['shuffleImage'])
+        self.shuffleButton.setIconSize(self.shuffleButton.size())
+
         self.thumbnailLabel.setScaledContents(True)
 
         # Push Buttons
         self.playButton.clicked.connect(self.toggle)
         self.forwardButton.clicked.connect(self.next)
         self.backButton.clicked.connect(self.back)
+        self.loopButton.clicked.connect(self.loop)
 
         # Function calls
         self.updateMeta()
@@ -97,13 +106,17 @@ class GUI(Ui_MainWindow):
     def next(self):
         if con.track['media']:
             self.stop()
-        if len(self.queue) > 0:
-            self.backQueue.append(self.queue.pop(0))
-        if len(self.queue) > 0:
-            self.play(self.queue[0])
+        if not self.looping:
+            if len(self.queue) > 0:
+                self.backQueue.append(self.queue.pop(0))
+            if len(self.queue) > 0:
+                self.play(self.queue[0])
+        else:
+            if len(self.queue) > 0:
+                self.play(self.queue[0])
 
     def back(self):
-        if con.track['media'] and con.track['media'].get_time() > 2000 and con.track['media'].get_length() > 3000:
+        if con.track['media'] and ( (con.track['media'].get_time() > 2000 and con.track['media'].get_length() > 3000) or self.looping ):
             con.track['media'].set_time(0)
         elif con.track['media']:
             self.stop()
@@ -132,6 +145,13 @@ class GUI(Ui_MainWindow):
 
     def resume(self):
         con.resume()
+
+    def loop(self):
+        self.looping = not self.looping
+        key = 'loopImage'
+        if self.looping:
+            key = 'loopActivatedImage'
+        self.loopButton.setIcon(self.theme[key])
 
     def cooldown(self, element, sec:int):
         def wait():
