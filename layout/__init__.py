@@ -90,13 +90,21 @@ class Ui_MainWindow(object):
         self.searchInput = QtWidgets.QLineEdit(self.searchBox)
         self.searchInput.setGeometry(QtCore.QRect(32, 10, 121, 24))
         self.searchInput.setObjectName("searchInput")
+        self.musicArea = QtWidgets.QScrollArea(MainWindow)
+        self.musicArea.setGeometry(QtCore.QRect(120, 80, 841, 521))
+        self.musicArea.setWidgetResizable(True)
+        self.musicArea.setObjectName("musicArea")
+        self.musicContents = QtWidgets.QWidget()
+        self.musicContents.setGeometry(QtCore.QRect(0, 0, 839, 519))
+        self.musicContents.setObjectName("musicContents")
+        self.musicArea.setWidget(self.musicContents)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Form"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Razor Music Player"))
 
 
 if __name__ == "__main__":

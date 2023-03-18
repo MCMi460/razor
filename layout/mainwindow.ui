@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Razor Music Player</string>
   </property>
   <widget class="QGroupBox" name="sidePlayer">
    <property name="geometry">
@@ -250,6 +250,29 @@
       </rect>
      </property>
     </widget>
+   </widget>
+  </widget>
+  <widget class="QScrollArea" name="musicArea">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>80</y>
+     <width>841</width>
+     <height>521</height>
+    </rect>
+   </property>
+   <property name="widgetResizable">
+    <bool>true</bool>
+   </property>
+   <widget class="QWidget" name="musicContents">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>839</width>
+      <height>519</height>
+     </rect>
+    </property>
    </widget>
   </widget>
  </widget>

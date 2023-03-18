@@ -1,3 +1,11 @@
+/* Courtesy of @mrgamecub3
+    Darkest- #242424
+    Dark- #2F2F2F
+    Medium- #404040
+    Light- #515151
+    Lightest- #6A6A6A
+*/
+
 * {
     background-color: #242424;
     color: #FFF;
@@ -14,6 +22,54 @@ QLabel {
 
 QSlider {
     background-color: transparent;
+}
+
+QSlider::handle {
+    background-color: #404040;
+    border-radius: 5px;
+}
+QSlider::handle:vertical {
+    height: 15px;
+    margin: 0px -2px;
+}
+QSlider::handle:horizontal {
+    width: 15px;
+    margin: -4px 0px -4px 0px;
+}
+
+QSlider::add-page {
+    border-radius: 5px;
+    background: #A00000;
+}
+QSlider::add-page:vertical {
+    margin: 0px 3px 0px 3px;
+}
+QSlider::add-page:horizontal {
+    margin: 3px 0px 3px 0px;
+}
+
+QSlider::sub-page {
+    border-radius: 5px;
+    background: #A00000;
+}
+QSlider::sub-page:vertical {
+    margin: 0px 3px 0px 3px;
+}
+QSlider::sub-page:horizontal {
+    margin: 3px 0px 3px 0px;
+}
+
+QSlider::groove {
+    border-radius: 5px;
+    position: absolute;
+}
+QSlider::groove:vertical {
+    left: 10px;
+    right: 10px;
+}
+QSlider::groove:horizontal {
+    top: 10px;
+    bottom: 10px;
 }
 
 QPushButton {
