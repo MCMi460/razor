@@ -56,6 +56,9 @@
       <height>45</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="text">
      <string/>
     </property>
@@ -68,6 +71,9 @@
       <width>35</width>
       <height>35</height>
      </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="text">
      <string/>
@@ -82,6 +88,9 @@
       <height>35</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="text">
      <string/>
     </property>
@@ -95,6 +104,9 @@
       <height>35</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="text">
      <string/>
     </property>
@@ -107,6 +119,25 @@
       <width>35</width>
       <height>35</height>
      </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="queueButton">
+    <property name="geometry">
+     <rect>
+      <x>57</x>
+      <y>550</y>
+      <width>35</width>
+      <height>35</height>
+     </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="text">
      <string/>
@@ -199,7 +230,7 @@
      <rect>
       <x>620</x>
       <y>30</y>
-      <width>31</width>
+      <width>20</width>
       <height>20</height>
      </rect>
     </property>
@@ -210,9 +241,9 @@
    <widget class="QLabel" name="volumeMin">
     <property name="geometry">
      <rect>
-      <x>410</x>
+      <x>420</x>
       <y>30</y>
-      <width>31</width>
+      <width>20</width>
       <height>20</height>
      </rect>
     </property>
@@ -302,10 +333,48 @@
      <height>51</height>
     </rect>
    </property>
+   <property name="cursor">
+    <cursorShape>PointingHandCursor</cursorShape>
+   </property>
    <property name="text">
     <string/>
    </property>
   </widget>
+  <widget class="QScrollArea" name="queueArea">
+   <property name="geometry">
+    <rect>
+     <x>114</x>
+     <y>80</y>
+     <width>142</width>
+     <height>521</height>
+    </rect>
+   </property>
+   <property name="verticalScrollBarPolicy">
+    <enum>Qt::ScrollBarAlwaysOff</enum>
+   </property>
+   <property name="horizontalScrollBarPolicy">
+    <enum>Qt::ScrollBarAlwaysOff</enum>
+   </property>
+   <property name="widgetResizable">
+    <bool>true</bool>
+   </property>
+   <widget class="QWidget" name="queueContents">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>140</width>
+      <height>519</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <zorder>musicArea</zorder>
+  <zorder>sidePlayer</zorder>
+  <zorder>songMetadata</zorder>
+  <zorder>searchSection</zorder>
+  <zorder>themeButton</zorder>
+  <zorder>queueArea</zorder>
  </widget>
  <resources/>
  <connections/>

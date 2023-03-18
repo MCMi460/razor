@@ -82,3 +82,11 @@ QPushButton {
     background-color: transparent;
     border: 0px;
 }
+
+QScrollArea {
+    background-color: transparent;
+}
+
+#queueContents {
+    background-color: #404040;
+}

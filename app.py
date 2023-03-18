@@ -25,6 +25,12 @@ class GUI(Ui_MainWindow):
         }
 
     def setup(self):
+        # Queue Menu
+        self.queueArea.hide()
+        self.queueLayout = QGridLayout()
+        self.queueContents.setLayout(self.queueLayout)
+        self.queueUpdate()
+
         # Images
         icons = {
             'playImage': 'play.png',
@@ -35,9 +41,12 @@ class GUI(Ui_MainWindow):
             'backImage': 'rewind.png',
             'nextImage': 'skip.png',
             'modeImage': 'mode.png',
+            'queueImage': 'queue.png',
         }
         pixmaps = {
             'blankThumbnail': 'thumbnail.png',
+            'audio1': 'audio1.png',
+            'audio2': 'audio2.png',
         }
         self.lightImages = icons.copy() | pixmaps.copy()
         self.darkImages = icons.copy() | pixmaps.copy()
@@ -60,9 +69,15 @@ class GUI(Ui_MainWindow):
         self.backButton.clicked.connect(self.back)
         self.loopButton.clicked.connect(self.loop)
         self.themeButton.clicked.connect(self.toggleTheme)
+        self.volumeMax.mouseReleaseEvent = lambda a : self.volumeSlider.setValue(self.volumeSlider.value() + 20)
+        self.volumeMin.mouseReleaseEvent = lambda a : self.volumeSlider.setValue(self.volumeSlider.value() - 20)
+        self.queueButton.clicked.connect(self.toggleQueue)
+
+        self.underLyingButton = QPushButton()
+        self.underLyingButton.clicked.connect(lambda a : self.queueUpdate(True))
 
         self.progressBar.sliderReleased.connect(self.updateDuration)
-        self.volumeSlider.sliderReleased.connect(self.updateVolume)
+        self.volumeSlider.valueChanged.connect(self.updateVolume)
 
     def toggle(self):
         if con.track['media'] and con.track['media'].is_playing():
@@ -86,6 +101,7 @@ class GUI(Ui_MainWindow):
                 id = self.queue[0]
             threading.Thread(target = self._constantPlay, args = (self.providerName, id,), daemon = True).start()
         self.playButton.setIcon(self.theme['pauseImage'])
+        self.underLyingButton.clicked.emit()
 
     def _constantPlay(self, provider, id):
         con.play(provider, id, False)
@@ -104,28 +120,34 @@ class GUI(Ui_MainWindow):
         else:
             self.stop()
 
-    def next(self):
+    def next(self, distance = 0):
+        print(distance)
         if con.track['media']:
             self.stop()
-        if not self.looping:
-            if len(self.queue) > 0:
-                self.backQueue.append(self.queue.pop(0))
+        if not self.looping or distance > 0:
+            for i in range(distance + 1):
+                if len(self.queue) > 0:
+                    self.backQueue.append(self.queue.pop(0))
             if len(self.queue) > 0:
                 self.play(self.queue[0])
         else:
             if len(self.queue) > 0:
                 self.play(self.queue[0])
+        self.underLyingButton.clicked.emit()
 
     def back(self):
         if con.track['media'] and ( (con.track['media'].get_time() > 2000 and con.track['media'].get_length() > 3000) or self.looping ):
             con.track['media'].set_time(0)
+            self.queueUpdate(True)
+            return
         elif con.track['media']:
             self.stop()
+            self.queueUpdate()
         if len(self.backQueue) > 0:
             self.queue.insert(0, self.backQueue.pop(-1))
             if len(self.queue) > 0:
                 self.play(self.queue[0])
-
+            self.queueUpdate(True)
 
     def addToQueue(self, id:str):
         if not id:
@@ -134,6 +156,7 @@ class GUI(Ui_MainWindow):
                 raise Exception('no songs!')
             id = random.choice(self.provider.LIST_TRACKS())
         self.queue.append(id)
+        self.queueUpdate()
         return self.queue[0]
 
     def stop(self):
@@ -180,7 +203,7 @@ class GUI(Ui_MainWindow):
         self.titleLabel.setText(info['title'])
         self.uploaderLabel.setText(info['artist'])
         if not id:
-            rpc.clear()
+            if connected: rpc.clear()
             pix = self.theme['blankThumbnail']
         else:
             self.updatePresence(info)
@@ -198,12 +221,15 @@ class GUI(Ui_MainWindow):
             'small_image': 'logo',
             'small_text': 'Razor v%s' % version,
         }
-        if con.track['media'] and con.track['media'].is_playing():
-            dict['end'] = time.time() + (con.track['media'].get_length() - con.track['media'].get_time()) / 1000
+        try:
+            if con.track['media'] and con.track['media'].is_playing():
+                dict['end'] = time.time() + (con.track['media'].get_length() - con.track['media'].get_time()) / 1000
+        except:
+            pass
         if not self.cache['title']:
-            rpc.clear()
+            if connected: rpc.clear()
         else:
-            rpc.update(**dict)
+            if connected: rpc.update(**dict)
 
     def updateProgressBar(self):
         while con.track['media'] and con.track['media'].get_state() in (vlc.State.Playing, vlc.State.Paused):
@@ -250,6 +276,14 @@ class GUI(Ui_MainWindow):
         self.shuffleButton.setIcon(self.theme['shuffleImage'])
         self.shuffleButton.setIconSize(self.shuffleButton.size())
 
+        self.queueButton.setIcon(self.theme['queueImage'])
+        self.queueButton.setIconSize(self.queueButton.size())
+
+        self.volumeMin.setPixmap(self.theme['audio1'])
+        self.volumeMin.setScaledContents(True)
+        self.volumeMax.setPixmap(self.theme['audio2'])
+        self.volumeMax.setScaledContents(True)
+
         self.themeButton.setIcon(self.theme['modeImage'])
         self.themeButton.setIconSize(self.themeButton.size())
 
@@ -264,14 +298,60 @@ class GUI(Ui_MainWindow):
         if con.track['media']:
             con.track['media'].audio_set_volume(self.volumeSlider.value())
 
+    def emptyLayout(self, layout):
+        if layout:
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget != None:
+                    widget.deleteLater()
+                else:
+                    self.emptyLayout(item.layout())
+
+    def queueUpdate(self, forceStart = False):
+        self.emptyLayout(self.queueLayout)
+        y = 0
+        if len(self.queue) > 1 or (not con.track['media'] and len(self.queue) > 0):
+            start = 1
+            if not con.track['media'] and not forceStart:
+                start = 0
+            distance = start
+            for song in self.queue[start:]:
+                group = QGroupBox()
+                group.move(0, y)
+                group.setFixedSize(119, 71)
+                group.setCursor(QCursor(Qt.PointingHandCursor))
+                label = QLabel(group)
+                label.move(5,5)
+                label.resize(109, 61)
+                pix = QPixmap('sources/%s/%s.jpg' % (self.providerName, song))
+                label.setPixmap(pix)
+                label.setScaledContents(True)
+                print('h', str(distance))
+                label.mouseReleaseEvent = lambda a : self.next(int(str(distance)))
+                self.queueLayout.addWidget(group)
+                distance += 1
+                y += 80
+            self.queueLayout.addItem(QSpacerItem(0,521))
+
+    def toggleQueue(self):
+        if self.queueArea.isVisible():
+            self.queueArea.hide()
+        else:
+            self.queueArea.show()
+
 if __name__ == '__main__':
     # Begin main thread for user
     con = Console()
 
     # Discord RPC
-    rpc = pypresence.Presence('874365581162328115')
-    rpc.connect()
-    rpc.clear()
+    try:
+        rpc = pypresence.Presence('874365581162328115')
+        rpc.connect()
+        rpc.clear()
+        connected = True
+    except:
+        connected = False
 
     # Main Window
     app = QApplication(sys.argv)
