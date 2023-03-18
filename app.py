@@ -101,6 +101,7 @@ class GUI(Ui_MainWindow):
         self.progressBar.setValue(0)
         self.progressBar.setMaximum(con.track['media'].get_length())
         threading.Thread(target = self.updateProgressBar, daemon = True).start()
+        self.playButton.setIcon(self.theme['pauseImage'])
         while con.track['media'] and con.track['media'].get_state() in (vlc.State.Playing, vlc.State.Paused):
             pass
         if con.track['media']:
