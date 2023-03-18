@@ -65,6 +65,9 @@ class Source:
                         response['artist'] = info.get('uploader')
                         response['thumbnail'] = info.get('thumbnail')
                         self.IDS.append(response)
+                    if not response['thumbnail'].endswith('jpg'):
+                        image = PIL.Image.open('./sources/youtube/%s.%s' % (response['id'], response['thumbnail'].split('.')[-1])).convert('RGB')
+                        image.save('./sources/youtube/%s.jpg' % response['id'], 'jpeg')
                     self.UPDATE_TITLE_LIST()
                     return os.path.abspath('./sources/youtube/%s.mp3' % id)
                 except:

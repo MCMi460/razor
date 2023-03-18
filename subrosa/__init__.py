@@ -9,6 +9,7 @@ import os, sys, random, traceback, threading, time, json, copy
 import youtube_dl
 import vlc
 import pypresence
+import PIL.Image
 if os.name == 'nt':
     import pyreadline3
 else:
