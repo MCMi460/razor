@@ -17,6 +17,13 @@ class GUI(Ui_MainWindow):
         self.backQueue = []
         self.looping = False
 
+        self.cache = {
+            'title': '',
+            'artist': '',
+            'thumbnail': '',
+            'id': '',
+        }
+
     def setup(self):
         # Images
         icons = {
@@ -140,9 +147,11 @@ class GUI(Ui_MainWindow):
 
     def pause(self):
         con.pause()
+        self.updatePresence()
 
     def resume(self):
         con.resume()
+        self.updatePresence()
 
     def loop(self):
         self.looping = not self.looping
@@ -171,10 +180,30 @@ class GUI(Ui_MainWindow):
         self.titleLabel.setText(info['title'])
         self.uploaderLabel.setText(info['artist'])
         if not id:
+            rpc.clear()
             pix = self.theme['blankThumbnail']
         else:
+            self.updatePresence(info)
             pix = QPixmap('sources/%s/%s.jpg' % (self.providerName, id))
         self.thumbnailLabel.setPixmap(pix)
+
+    def updatePresence(self, info:dict = {}):
+        for key in info.keys():
+            self.cache[key] = info[key]
+        dict = {
+            'state': self.cache['title'],
+            'large_image': self.cache['thumbnail'],
+            'large_text': self.cache['title'],
+            'buttons': [{'label': 'YouTube', 'url':'https://youtube.com/watch?v=%s' % self.cache['id']}],
+            'small_image': 'logo',
+            'small_text': 'Razor v%s' % version,
+        }
+        if con.track['media'] and con.track['media'].is_playing():
+            dict['end'] = time.time() + (con.track['media'].get_length() - con.track['media'].get_time()) / 1000
+        if not self.cache['title']:
+            rpc.clear()
+        else:
+            rpc.update(**dict)
 
     def updateProgressBar(self):
         while con.track['media'] and con.track['media'].get_state() in (vlc.State.Playing, vlc.State.Paused):
@@ -184,6 +213,7 @@ class GUI(Ui_MainWindow):
     def updateDuration(self):
         if con.track['media']:
             con.track['media'].set_time(self.progressBar.value())
+            self.updatePresence()
         else:
             self.stop()
 
@@ -239,7 +269,9 @@ if __name__ == '__main__':
     con = Console()
 
     # Discord RPC
-
+    rpc = pypresence.Presence('874365581162328115')
+    rpc.connect()
+    rpc.clear()
 
     # Main Window
     app = QApplication(sys.argv)

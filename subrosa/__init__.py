@@ -1,6 +1,9 @@
 # MCMi460 on Github
 # Track Handling, Sub-Rosa
 
+# Version
+version = 0.3
+
 # Imports
 import os, sys, random, traceback, threading, time, json
 import youtube_dl
