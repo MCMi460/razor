@@ -495,14 +495,18 @@ class GUI(Ui_MainWindow):
             threading.Thread(target = self.processSearch, daemon = True).start()
 
     def processSearch(self):
-        searchResults = self.provider.SEARCH(self.searchBar.text())
-        for result in searchResults:
-            result['id'] = result.get('id')
-            result['title'] = result.get('title')
-            result['artist'] = result.get('uploader')
-            result['thumbnail'] = result.get('thumbnail')
-            result['online'] = True
-        self.searchResults = searchResults
+        terms = self.searchBar.text()
+        if not terms:
+            self.searchResults = []
+        else:
+            searchResults = self.provider.SEARCH(terms)
+            for result in searchResults:
+                result['id'] = result.get('id')
+                result['title'] = result.get('title')
+                result['artist'] = result.get('uploader')
+                result['thumbnail'] = result.get('thumbnail')
+                result['online'] = True
+            self.searchResults = searchResults
         self.triggerMain.clicked.emit()
         self.searchBar.setEnabled(True)
         self.searching = False
