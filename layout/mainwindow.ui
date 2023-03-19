@@ -281,15 +281,11 @@
       <height>21</height>
      </rect>
     </property>
-    <property name="nativeMenuBar">
-     <bool>false</bool>
-    </property>
     <widget class="QMenu" name="menuRazor">
      <property name="title">
       <string>Razor</string>
      </property>
      <addaction name="a_Settings"/>
-     <addaction name="a_showSource"/>
      <addaction name="a_closeApp"/>
     </widget>
     <widget class="QMenu" name="menuHelp">
@@ -298,7 +294,14 @@
      </property>
      <addaction name="a_issue"/>
     </widget>
+    <widget class="QMenu" name="menuFile">
+     <property name="title">
+      <string>File</string>
+     </property>
+     <addaction name="a_showSource"/>
+    </widget>
     <addaction name="menuRazor"/>
+    <addaction name="menuFile"/>
     <addaction name="menuHelp"/>
    </widget>
    <widget class="QStackedWidget" name="topMenu">
