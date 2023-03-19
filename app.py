@@ -382,8 +382,8 @@ class GUI(Ui_MainWindow):
         # Spacer
         self.queueLayout.addItem(QSpacerItem(0,471))
 
-    def toggleQueue(self):
-        if self.queueArea.isVisible():
+    def toggleQueue(self, event, hide = False):
+        if self.queueArea.isVisible() or hide:
             self.queueArea.hide()
             self.clearButton.hide()
         else:
@@ -427,12 +427,43 @@ class GUI(Ui_MainWindow):
                 else:
                     pix = QPixmap('sources/%s/%s.jpg' % (self.providerName, songs[n]['id']))
                 thumbnail.setPixmap(pix)
-                thumbnail.mouseReleaseEvent = lambda event, n = songs[n] : self.next(self.addToQueue(n['id'], 1), True) if event.button() == Qt.LeftButton else None
+                overPicture = QGroupBox(overlay)
+                overPicture.move(i * 191 + 15 * i, 0)
+                overPicture.setFixedSize(191, 107)
+                overPicture.setStyleSheet('')
+                overPicture.mouseReleaseEvent = lambda event, n = songs[n] : self.next(self.addToQueue(n['id'], 1), True) if event.button() == Qt.LeftButton else None
                 if not menu:
-                    thumbnail.contextMenuEvent = lambda event, id = songs[n]['id'] : self.downloadedSongDropdown(event, id)
+                    overPicture.contextMenuEvent = lambda event, id = songs[n]['id'] : self.downloadedSongDropdown(event, id)
                 else:
-                    thumbnail.contextMenuEvent = lambda event, id = songs[n]['id'] : self.onlineSongsDropdown(event, id)
-                thumbnail.setCursor(QCursor(Qt.PointingHandCursor))
+                    overPicture.contextMenuEvent = lambda event, id = songs[n]['id'] : self.onlineSongsDropdown(event, id)
+                title = QLabel(overPicture)
+                title.setFixedSize(181, 50)
+                title.move(5,5)
+                title.setText(songs[n]['title'])
+                style = 'background-color:transparent; color: #FFF;'
+                title.setStyleSheet(style)
+                title.setWordWrap(True)
+                title.setAlignment(Qt.AlignCenter)
+                title.hide()
+                artist = QLabel(overPicture)
+                artist.setFixedSize(181, 30)
+                artist.move(5, 65)
+                artist.setText(songs[n]['artist'])
+                artist.setStyleSheet(style)
+                artist.setWordWrap(True)
+                artist.setAlignment(Qt.AlignCenter)
+                artist.hide()
+                def show(overPicture, title, artist):
+                    overPicture.setStyleSheet('background-color:rgba(0,0,0,0.5);')
+                    title.show()
+                    artist.show()
+                def hide(overPicture, title, artist):
+                    overPicture.setStyleSheet('')
+                    title.hide()
+                    artist.hide()
+                overPicture.enterEvent = lambda e, overPicture = overPicture, title = title, artist = artist : show(overPicture, title, artist)
+                overPicture.leaveEvent = lambda e, overPicture = overPicture, title = title, artist = artist : hide(overPicture, title, artist)
+                overPicture.setCursor(QCursor(Qt.PointingHandCursor))
             self.musicLayout.addWidget(overlay)
             y += 122
         endg = QGroupBox()
@@ -498,10 +529,12 @@ class GUI(Ui_MainWindow):
         if self.topMenu.currentIndex() == 0:
             self.searchButton.setIcon(self.theme['homeImage'])
             self.topMenu.setCurrentIndex(1)
+            self.toggleQueue(None, True)
             self.fillMainWindow()
         else:
             self.searchButton.setIcon(self.theme['searchImage'])
             self.topMenu.setCurrentIndex(0)
+            self.toggleQueue(None, True)
             self.fillMainWindow()
 
     def searchFinish(self):
@@ -531,7 +564,7 @@ class GUI(Ui_MainWindow):
         self.triggerMain.clicked.emit()
         self.searchBar.setEnabled(True)
         self.loadingGif.hide()
-        self.move.stop()
+        self.movie.stop()
         self.searching = False
 
     def clearQueue(self):
