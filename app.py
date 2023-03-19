@@ -364,6 +364,7 @@ class GUI(Ui_MainWindow):
                 label.setPixmap(pix)
                 label.setScaledContents(True)
                 label.mouseReleaseEvent = lambda event, i = i : self.next(i, True) if event.button() == Qt.LeftButton else None
+                label.contextMenuEvent = lambda event, i = i : self.queueSongDropdown(event, i)
                 label.setCursor(QCursor(Qt.PointingHandCursor))
                 self.queueLayout.addWidget(group)
                 y += 80
@@ -469,6 +470,17 @@ class GUI(Ui_MainWindow):
             self.fillMainWindow()
             self.queueUpdate()
 
+    def queueSongDropdown(self, event, position:int):
+        contextMenu = QMenu(self.MainWindow)
+        skip = contextMenu.addAction('Skip to here')
+        remove = contextMenu.addAction('Remove from queue')
+        action = contextMenu.exec_(event.globalPos())
+        if action == skip:
+            self.next(position, True)
+        elif action == remove:
+            self.queue.pop(position)
+            self.queueUpdate()
+
     def onlineSongsDropdown(self, event, id:str):
         contextMenu = QMenu(self.MainWindow)
         play = contextMenu.addAction('Play')
@@ -523,7 +535,10 @@ class GUI(Ui_MainWindow):
         self.searching = False
 
     def clearQueue(self):
-        for song in self.queue[1:]:
+        start = 1
+        if not con.track['media']:
+            start = 0
+        for song in self.queue[start:]:
             self.queue.remove(song)
         self.queueUpdate()
 
