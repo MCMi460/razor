@@ -113,6 +113,10 @@ QMenu::item:selected {
     background-color: #A00000;
 }
 
+QMenuBar {
+    background-color: transparent;
+}
+
 QLineEdit {
     border: 0px;
     border-bottom: 1px solid #FFF;

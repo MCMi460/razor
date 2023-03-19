@@ -58,6 +58,11 @@ class GUI(Ui_MainWindow):
         self.musicContents.setLayout(self.musicLayout)
         self.end = QLabel()
 
+        # Menu Bar
+        self.a_showSource.triggered.connect(lambda e : os.system('start %s' % appPath) if os.name == 'nt' else os.system('open %s' % appPath))
+        self.a_closeApp.triggered.connect(self.MainWindow.close)
+        self.a_issue.triggered.connect(lambda e : webbrowser.open('https://github.com/MCMi460/razor/issues/new'))
+
         # Images
         icons = {
             'playImage': 'play.png',
