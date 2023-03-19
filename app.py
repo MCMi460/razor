@@ -80,6 +80,10 @@ class GUI(Ui_MainWindow):
 
         self.theme = self.darkImages
 
+        self.movie = QMovie('layout/resources/loading.gif')
+        self.loadingGif.setMovie(self.movie)
+        self.loadingGif.setScaledContents(True)
+
         # Connections
         self.playButton.clicked.connect(self.toggle)
         self.forwardButton.clicked.connect(lambda event : self.next())
@@ -492,6 +496,8 @@ class GUI(Ui_MainWindow):
         if not self.searching:
             self.searching = True
             self.searchBar.setEnabled(False)
+            self.loadingGif.show()
+            self.movie.start()
             threading.Thread(target = self.processSearch, daemon = True).start()
 
     def processSearch(self):
@@ -500,15 +506,20 @@ class GUI(Ui_MainWindow):
             self.searchResults = []
         else:
             searchResults = self.provider.SEARCH(terms)
+            self.searchResults = []
             for result in searchResults:
+                if not 'Music' in result['categories'] and not terms.startswith('http'):
+                    continue
                 result['id'] = result.get('id')
                 result['title'] = result.get('title')
                 result['artist'] = result.get('uploader')
                 result['thumbnail'] = result.get('thumbnail')
                 result['online'] = True
-            self.searchResults = searchResults
+                self.searchResults.append(result)
         self.triggerMain.clicked.emit()
         self.searchBar.setEnabled(True)
+        self.loadingGif.hide()
+        self.move.stop()
         self.searching = False
 
     def clearQueue(self):

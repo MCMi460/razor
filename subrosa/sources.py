@@ -48,7 +48,7 @@ class Source:
             self.UPDATE_TITLE_LIST()
 
         ### Standardized methods ###
-        def DOWNLOAD_TRACK(self, id:str) -> str:
+        def DOWNLOAD_TRACK(self, id:str, hook = None) -> str:
             assert isinstance(id, str)
             self.CHECK_TITLE_LIST()
             if id in ( a['id'] for a in self.IDS ):
@@ -56,9 +56,12 @@ class Source:
             url = 'https://youtube.com/watch?v=%s' % id
             response = track_info.copy()
             response['id'] = id
+            opts = self.ydl_opts.copy()
+            if hook:
+                opts['progress_hooks'] = [hook]
             for i in range(2):
                 try:
-                    with youtube_dl.YoutubeDL(self.ydl_opts) as ydl:
+                    with youtube_dl.YoutubeDL(opts) as ydl:
                         info = ydl.extract_info(url, download = True)
                         response['id'] = info.get('id')
                         response['title'] = info.get('title')
@@ -102,7 +105,7 @@ class Source:
                     pass
             return response
 
-        def SEARCH(self, terms:str, cutoff:int = 10) -> list:
+        def SEARCH(self, terms:str, *, cutoff:int = 10) -> list:
             assert isinstance(terms, str) and isinstance(cutoff, int)
             with youtube_dl.YoutubeDL(self.ydl_opts) as ydl:
                 return ydl.extract_info('ytsearch%s:%s' % (cutoff, terms), download = False)['entries']
@@ -116,6 +119,4 @@ class Source:
                         fd.deleteFile('youtube/%s.%s' % (song['id'], ext))
 
     def PLAY_TRACK(PROVIDER:object, id:str):
-        if not id in PROVIDER.IDS:
-            PROVIDER.DOWNLOAD_TRACK(id)
         return vlc.MediaPlayer(PROVIDER.DOWNLOAD_TRACK(id))

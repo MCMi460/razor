@@ -360,6 +360,19 @@
        </rect>
       </property>
      </widget>
+     <widget class="QLabel" name="loadingGif">
+      <property name="geometry">
+       <rect>
+        <x>720</x>
+        <y>30</y>
+        <width>21</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>
