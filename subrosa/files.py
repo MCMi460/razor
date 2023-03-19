@@ -1,32 +1,53 @@
 # MCMi460 on Github
 from . import *
 
+def getAppPath(): # Credit to @HotaruBlaze
+    applicationPath = os.path.expanduser('~/Documents/Razor')
+    # Windows allows you to move your UserProfile subfolders, Such as Documents, Videos, Music etc.
+    # However os.path.expanduser does not actually check and assumes it's in the default location.
+    # This tries to correctly resolve the Documents path and fallbacks to default if it fails.
+    if os.name == 'nt':
+        try:
+            import ctypes.wintypes
+            CSIDL_PERSONAL = 5 # My Documents
+            SHGFP_TYPE_CURRENT = 0 # Get current, not default value
+            buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+            ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
+            applicationPath = os.path.join(buf.value, '3DS-RPC')
+        except:
+            pass
+    return applicationPath
+
+appPath = getAppPath()
+
 class FileSystem():
-    def __init__(self, directory:str = './sources/') -> None:
+    def __init__(self, directory:str = 'sources/') -> None:
         assert isinstance(directory, str)# or...
         if not os.path.isdir(directory):
-            os.mkdir(directory)
-        self.directory = directory
+            os.makedirs(directory)
+        self.directory = os.path.join(appPath, directory)
 
-    def isFile(self, path:str) -> None:
-        assert isinstance(path, str)
-        return os.path.isfile(path)
+    def isFile(self, route:str) -> None:
+        assert isinstance(route, str)
+        file = self.directory + route
+        return os.path.isfile(file)
 
-    def isFolder(self, path:str) -> None:
-        assert isinstance(path, str)
-        return os.path.isdir(path)
+    def isFolder(self, route:str) -> None:
+        assert isinstance(route, str)
+        folder = self.directory + route
+        return os.path.isdir(folder)
 
     def createDirectory(self, route:str) -> None:
         assert isinstance(route, str)
         folder = self.directory + route
-        if not self.isFolder(folder):
-            os.mkdir(folder)
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
 
     # `data` is not binary
     def createFile(self, route:str, data) -> None:
         assert isinstance(route, str)
         file = self.directory + route
-        if self.isFile(file):
+        if os.path.isfile(file):
             os.remove(file)
 
         with open(file, 'w') as fd:
@@ -42,7 +63,7 @@ class FileSystem():
     def readFile(self, route:str) -> None:
         assert isinstance(route, str)
         file = self.directory + route
-        assert self.isFile(file)
+        assert os.path.isfile(file)
 
         with open(file, 'r') as fd:
             return fd.read()
@@ -50,6 +71,6 @@ class FileSystem():
     def deleteFile(self, route:str) -> None:
         assert isinstance(route, str)
         file = self.directory + route
-        assert self.isFile(file)
+        assert os.path.isfile(file)
 
         os.remove(file)

@@ -241,7 +241,7 @@ class GUI(Ui_MainWindow):
         self.titleLabel.setText(info['title'])
         self.uploaderLabel.setText(info['artist'])
         if not id:
-            if connected: rpc.clear()
+            if connected and self.provider.setupFinish: rpc.clear()
             pix = self.theme['blankThumbnail']
         else:
             self.updatePresence(info)
@@ -265,9 +265,9 @@ class GUI(Ui_MainWindow):
         except:
             pass
         if not self.cache['title']:
-            if connected: rpc.clear()
+            if connected and self.provider.setupFinish: rpc.clear()
         else:
-            if connected: rpc.update(**dict)
+            if connected and self.provider.setupFinish: rpc.update(**dict)
 
     def updateProgressBar(self):
         while con.track['media'] and con.track['media'].get_state() in (vlc.State.Playing, vlc.State.Paused):

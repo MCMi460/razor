@@ -24,14 +24,15 @@ class Source:
                     'preferredcodec': 'mp3',
                     'preferredquality': '192',
                 }],
-                'outtmpl': './sources/youtube/%(id)s.%(ext)s',
+                'outtmpl': os.path.join(fd.directory, 'youtube/%(id)s.%(ext)s'),
                 'quiet': True,
                 'noplaylist': True,
                 'writethumbnail': True,
             }
+            self.setupFinish = False
 
             fd.createDirectory('youtube')
-            if fd.isFile('./sources/youtube/IDS.txt'):
+            if fd.isFile('youtube/IDS.txt'):
                 try:
                     self.IDS = [ json.loads(a) for a in fd.readFile('youtube/IDS.txt').split('\n') ]
                 except:
@@ -46,12 +47,24 @@ class Source:
             self.IDS = []
             reDownload = []
             for song in IDS:
-                if not fd.isFile('./sources/youtube/%s.mp3' % song['id']):
+                if not fd.isFile('youtube/%s.mp3' % song['id']):
                     reDownload.append(song)
                 else:
                     self.IDS.append(song)
-            for song in reDownload:
-                threading.Thread(target = self.DOWNLOAD_TRACK, args = (song['id'],), kwargs = {'check_list': False, 'sendUpdate': sendUpdate,}, daemon = True).start()
+            def start():
+                for song in reDownload:
+                    try:
+                        self.DOWNLOAD_TRACK(song['id'], check_list = False, sendUpdate = sendUpdate)
+                    except Exception as e:
+                        #print('FAIL')
+                        #print(e)
+                        pass
+                    time.sleep(1)
+                self.setupFinish = True
+            if len(reDownload) > 0:
+                threading.Thread(target = start, daemon = True).start()
+            else:
+                self.setupFinish = True
             self.UPDATE_TITLE_LIST()
 
         ### Standardized methods ###
@@ -60,7 +73,7 @@ class Source:
             if check_list:
                 self.CHECK_TITLE_LIST()
                 if id in ( a['id'] for a in self.IDS ):
-                    return os.path.abspath('./sources/youtube/%s.mp3' % id)
+                    return os.path.abspath(os.path.join(fd.directory, 'youtube/%s.mp3' % id))
             url = 'https://youtube.com/watch?v=%s' % id
             response = track_info.copy()
             response['id'] = id
@@ -76,15 +89,16 @@ class Source:
                         response['artist'] = info.get('uploader')
                         response['thumbnail'] = info.get('thumbnail')
                     if not response['thumbnail'].endswith('jpg'):
-                        image = PIL.Image.open('./sources/youtube/%s.%s' % (response['id'], response['thumbnail'].split('.')[-1])).convert('RGB')
-                        image.save('./sources/youtube/%s.jpg' % response['id'], 'jpeg')
+                        image = PIL.Image.open(os.path.join(fd.directory, 'youtube/%s.%s' % (response['id'], response['thumbnail'].split('.')[-1]))).convert('RGB')
+                        image.save(os.path.join(fd.directory, 'youtube/%s.jpg' % response['id']), 'jpeg')
                         fd.deleteFile('youtube/%s.%s' % (response['id'], response['thumbnail'].split('.')[-1]))
                     self.IDS.append(response)
                     self.UPDATE_TITLE_LIST()
                     if sendUpdate:
                         sendUpdate()
-                    return os.path.abspath('./sources/youtube/%s.mp3' % id)
-                except:
+                    return os.path.abspath(os.path.join(fd.directory, 'youtube/%s.mp3' % id))
+                except Exception as e:
+                    #print(traceback.format_exc().strip())
                     pass
             if not check_list:
                 for i in range(len(self.IDS)):
