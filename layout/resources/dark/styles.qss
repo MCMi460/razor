@@ -16,6 +16,11 @@ QPushButton#themeButton {
     background-color: #2F2F2F;
 }
 
+QPushButton#clearButton {
+    background-color: #2F2F2F;
+    border-radius: 5px;
+}
+
 QGroupBox {
     background-color: #2F2F2F;
     border: 0px;
@@ -106,4 +111,12 @@ QMenu::separator {
 }
 QMenu::item:selected {
     background-color: #A00000;
+}
+
+QLineEdit {
+    border: 0px;
+    border-bottom: 1px solid #FFF;
+    padding-bottom: 2px;
+    color: #FFF;
+    background-color: transparent;
 }

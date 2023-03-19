@@ -16,6 +16,8 @@ class GUI(Ui_MainWindow):
         self.queue = []
         self.backQueue = []
         self.looping = False
+        self.searching = False
+        self.searchResults = []
 
         self.cache = {
             'title': '',
@@ -31,8 +33,12 @@ class GUI(Ui_MainWindow):
         # Main Window
         self.MainWindow.setFixedSize(960, 600)
 
+        # Top Menu
+        self.topMenu.setCurrentIndex(0)
+
         # Queue Menu
         self.queueArea.hide()
+        self.clearButton.hide()
         self.queueLayout = QGridLayout()
         self.queueContents.setLayout(self.queueLayout)
         self.queueUpdate()
@@ -40,6 +46,7 @@ class GUI(Ui_MainWindow):
         # Music Area
         self.musicLayout = QGridLayout()
         self.musicContents.setLayout(self.musicLayout)
+        self.end = QLabel()
 
         # Images
         icons = {
@@ -53,6 +60,7 @@ class GUI(Ui_MainWindow):
             'modeImage': 'mode.png',
             'queueImage': 'queue.png',
             'searchImage': 'search.png',
+            'homeImage': 'home.png',
         }
         pixmaps = {
             'blankThumbnail': 'thumbnail.png',
@@ -81,16 +89,22 @@ class GUI(Ui_MainWindow):
         self.volumeMax.mouseReleaseEvent = lambda a : self.volumeSlider.setValue(self.volumeSlider.value() + 20)
         self.volumeMin.mouseReleaseEvent = lambda a : self.volumeSlider.setValue(self.volumeSlider.value() - 20)
         self.queueButton.clicked.connect(self.toggleQueue)
+        self.clearButton.clicked.connect(self.clearQueue)
         self.shuffleButton.clicked.connect(self.shuffle)
+        self.searchButton.clicked.connect(self.toggleSearch)
 
         self.underLyingButton = QPushButton()
         self.underLyingButton.clicked.connect(lambda a : self.queueUpdate(True))
+        self.triggerMain = QPushButton()
+        self.triggerMain.clicked.connect(lambda a : self.fillMainWindow())
 
         self.progressBar.sliderReleased.connect(self.updateDuration)
         self.volumeSlider.valueChanged.connect(self.updateVolume)
 
+        self.searchBar.returnPressed.connect(self.searchFinish)
+
         self.themeUpdate()
-        self.fillMainWindow(self.provider.LIST_TRACKS_INFO())
+        self.fillMainWindow()
 
     def toggle(self):
         if con.track['media'] and con.track['media'].is_playing():
@@ -301,7 +315,10 @@ class GUI(Ui_MainWindow):
 
         self.themeButton.setIcon(self.theme['modeImage'])
         self.themeButton.setIconSize(self.themeButton.size())
-        self.searchButton.setIcon(self.theme['searchImage'])
+        if self.topMenu.currentIndex() == 0:
+            self.searchButton.setIcon(self.theme['searchImage'])
+        else:
+            self.searchButton.setIcon(self.theme['homeImage'])
         self.searchButton.setIconSize(self.searchButton.size())
 
         self.thumbnailLabel.setScaledContents(True)
@@ -363,8 +380,10 @@ class GUI(Ui_MainWindow):
     def toggleQueue(self):
         if self.queueArea.isVisible():
             self.queueArea.hide()
+            self.clearButton.hide()
         else:
             self.queueArea.show()
+            self.clearButton.show()
 
     def shuffle(self):
         if len(self.queue) > 1:
@@ -374,7 +393,13 @@ class GUI(Ui_MainWindow):
                 self.queue[i] = list[i - 1]
             self.queueUpdate()
 
-    def fillMainWindow(self, songs:list):
+    def fillMainWindow(self):
+        if self.topMenu.currentIndex() == 0:
+            songs = self.provider.LIST_TRACKS_INFO()
+            menu = False
+        else:
+            songs = self.searchResults
+            menu = True
         self.emptyLayout(self.musicLayout)
         y = 16
         rows = math.ceil(len(songs) / 4)
@@ -391,25 +416,101 @@ class GUI(Ui_MainWindow):
                 thumbnail.move(i * 191 + 15 * i, 0)
                 thumbnail.setFixedSize(191, 107)
                 thumbnail.setScaledContents(True)
-                pix = QPixmap('sources/%s/%s.jpg' % (self.providerName, songs[n]['id']))
+                if songs[n].get('online'):
+                    pix = QPixmap()
+                    pix.loadFromData(requests.get(songs[n]['thumbnail']).content)
+                else:
+                    pix = QPixmap('sources/%s/%s.jpg' % (self.providerName, songs[n]['id']))
                 thumbnail.setPixmap(pix)
                 thumbnail.mouseReleaseEvent = lambda event, n = songs[n] : self.next(self.addToQueue(n['id'], 1), True) if event.button() == Qt.LeftButton else None
-                thumbnail.contextMenuEvent = lambda event, id = songs[n]['id'] : self.downloadedSongDropdown(event, id)
+                if not menu:
+                    thumbnail.contextMenuEvent = lambda event, id = songs[n]['id'] : self.downloadedSongDropdown(event, id)
+                else:
+                    thumbnail.contextMenuEvent = lambda event, id = songs[n]['id'] : self.onlineSongsDropdown(event, id)
                 thumbnail.setCursor(QCursor(Qt.PointingHandCursor))
             self.musicLayout.addWidget(overlay)
             y += 122
+        endg = QGroupBox()
+        endg.setStyleSheet('background-color: transparent;')
+        endg.move(0, y)
+        endg.setFixedSize(809, 50)
+        self.end = QLabel(endg)
+        if rows > 4:
+            self.end.setText('You\'ve reached the end!')
+        elif menu and rows == 0:
+            self.end.setText('Searching for music online may take some time. Please be patient.')
+        self.end.resize(799, 40)
+        self.end.setWordWrap(True)
+        self.end.setAlignment(Qt.AlignCenter)
+        self.musicLayout.addWidget(endg)
         if rows <= 4:
-            self.musicLayout.addItem(QSpacerItem(0, 107 * (4 - rows) + 15 * (4 - rows)))
+            self.musicLayout.addItem(QSpacerItem(0, 107 * (4 - rows) + 15 * (4 - rows) - 50))
 
     def downloadedSongDropdown(self, event, id:str):
         contextMenu = QMenu(self.MainWindow)
         play = contextMenu.addAction('Play')
         add = contextMenu.addAction('Add to queue')
+        delete = contextMenu.addAction('Delete')
         action = contextMenu.exec_(event.globalPos())
         if action == add:
             self.addToQueue(id)
         elif action == play:
             self.next(self.addToQueue(id, 1), True)
+        elif action == delete:
+            self.provider.DELETE_TRACK(id)
+            for i in range(self.queue.count(id)):
+                self.queue.remove(id)
+            for i in range(self.backQueue.count(id)):
+                self.backQueue.remove(id)
+            self.fillMainWindow()
+            self.queueUpdate()
+
+    def onlineSongsDropdown(self, event, id:str):
+        contextMenu = QMenu(self.MainWindow)
+        play = contextMenu.addAction('Play')
+        download = contextMenu.addAction('Download')
+        action = contextMenu.exec_(event.globalPos())
+        if action == play:
+            self.next(self.addToQueue(id, 1), True)
+        elif action == download:
+            def download():
+                self.provider.DOWNLOAD_TRACK(id)
+                self.triggerMain.clicked.emit()
+            threading.Thread(target = download, daemon = True).start()
+
+    def toggleSearch(self):
+        if self.topMenu.currentIndex() == 0:
+            self.searchButton.setIcon(self.theme['homeImage'])
+            self.topMenu.setCurrentIndex(1)
+            self.fillMainWindow()
+        else:
+            self.searchButton.setIcon(self.theme['searchImage'])
+            self.topMenu.setCurrentIndex(0)
+            self.fillMainWindow()
+
+    def searchFinish(self):
+        if not self.searching:
+            self.searching = True
+            self.searchBar.setEnabled(False)
+            threading.Thread(target = self.processSearch, daemon = True).start()
+
+    def processSearch(self):
+        searchResults = self.provider.SEARCH(self.searchBar.text())
+        for result in searchResults:
+            result['id'] = result.get('id')
+            result['title'] = result.get('title')
+            result['artist'] = result.get('uploader')
+            result['thumbnail'] = result.get('thumbnail')
+            result['online'] = True
+        self.searchResults = searchResults
+        self.triggerMain.clicked.emit()
+        self.searchBar.setEnabled(True)
+        self.searching = False
+
+    def clearQueue(self):
+        for song in self.queue[1:]:
+            self.queue.remove(song)
+        self.queueUpdate()
 
 if __name__ == '__main__':
     # Begin main thread for user

@@ -68,6 +68,7 @@ class Source:
                     if not response['thumbnail'].endswith('jpg'):
                         image = PIL.Image.open('./sources/youtube/%s.%s' % (response['id'], response['thumbnail'].split('.')[-1])).convert('RGB')
                         image.save('./sources/youtube/%s.jpg' % response['id'], 'jpeg')
+                        fd.deleteFile('youtube/%s.%s' % (response['id'], response['thumbnail'].split('.')[-1]))
                     self.UPDATE_TITLE_LIST()
                     return os.path.abspath('./sources/youtube/%s.mp3' % id)
                 except:
@@ -105,6 +106,14 @@ class Source:
             assert isinstance(terms, str) and isinstance(cutoff, int)
             with youtube_dl.YoutubeDL(self.ydl_opts) as ydl:
                 return ydl.extract_info('ytsearch%s:%s' % (cutoff, terms), download = False)['entries']
+
+        def DELETE_TRACK(self, id:str) -> None:
+            assert isinstance(id, str)
+            for song in self.IDS:
+                if song['id'] == id:
+                    self.IDS.remove(song)
+                    for ext in ('mp3', 'jpg'):
+                        fd.deleteFile('youtube/%s.%s' % (song['id'], ext))
 
     def PLAY_TRACK(PROVIDER:object, id:str):
         if not id in PROVIDER.IDS:

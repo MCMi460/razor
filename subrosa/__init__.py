@@ -10,6 +10,7 @@ import youtube_dl
 import vlc
 import pypresence
 import PIL.Image
+import requests
 if os.name == 'nt':
     import pyreadline3
 else:

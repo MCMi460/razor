@@ -46,3 +46,10 @@ class FileSystem():
 
         with open(file, 'r') as fd:
             return fd.read()
+
+    def deleteFile(self, route:str) -> None:
+        assert isinstance(route, str)
+        file = self.directory + route
+        assert self.isFile(file)
+
+        os.remove(file)

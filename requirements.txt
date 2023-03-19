@@ -6,3 +6,4 @@ pyreadline3
 pyqt5
 pypresence
 Pillow
+requests
