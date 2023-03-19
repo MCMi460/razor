@@ -88,7 +88,10 @@ class GUI(Ui_MainWindow):
             for key in list(pixmaps.keys()):
                 getattr(self, type + 'Images')[key] = QPixmap(('layout/resources/%s/' % type) + pixmaps[key])
 
-        self.theme = self.darkImages
+        if con.config['darkMode']:
+            self.theme = self.darkImages
+        else:
+            self.theme = self.lightImages
 
         self.movie = QMovie('layout/resources/loading.gif')
         self.loadingGif.setMovie(self.movie)
@@ -284,9 +287,12 @@ class GUI(Ui_MainWindow):
     def toggleTheme(self):
         if self.theme == self.lightImages:
             self.theme = self.darkImages
+            con.config['darkMode'] = True
         else:
             self.theme = self.lightImages
+            con.config['darkMode'] = False
 
+        con._updateConfig()
         self.themeUpdate()
 
     def themeUpdate(self):

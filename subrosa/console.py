@@ -18,6 +18,11 @@ track = {
     'media': None,
 }
 
+# Config format
+configTemplate = {
+    'darkMode': False,
+}
+
 class Console():
     def __init__(self, *, prefix:str = '/', sendUpdate = None):
         self.prefix = prefix
@@ -36,6 +41,14 @@ class Console():
         self.track = track.copy()
 
         self.youtube = Source.Youtube(sendUpdate = sendUpdate)
+
+        self.config = configTemplate.copy()
+        if fd.isFile('config.txt'):
+            try:
+                self.config = json.loads(fd.readFile('config.txt'))
+            except:
+                pass
+        self._updateConfig()
 
     def _main(self):
         self._log(*self.tip)
@@ -72,6 +85,9 @@ class Console():
         else:
             raise Exception('provider unknown')
         return provider
+
+    def _updateConfig(self) -> None:
+        fd.createFile('config.txt', json.dumps(self.config))
 
     def exit(self):
         """
