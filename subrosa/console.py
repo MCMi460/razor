@@ -19,7 +19,7 @@ track = {
 }
 
 class Console():
-    def __init__(self, *, prefix:str = '/'):
+    def __init__(self, *, prefix:str = '/', sendUpdate = None):
         self.prefix = prefix
         self.commands = {}
         for func in dir(self):
@@ -35,7 +35,7 @@ class Console():
         # Currently playing track:
         self.track = track.copy()
 
-        self.youtube = Source.Youtube()
+        self.youtube = Source.Youtube(sendUpdate = sendUpdate)
 
     def _main(self):
         self._log(*self.tip)

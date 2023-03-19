@@ -10,7 +10,7 @@ track_info = {
 
 class Source:
     class Youtube():
-        def __init__(self) -> None:
+        def __init__(self, *, sendUpdate = None) -> None:
             self.IDS = [
                 # Default:
                 # NONE
@@ -36,30 +36,38 @@ class Source:
                     self.IDS = [ json.loads(a) for a in fd.readFile('youtube/IDS.txt').split('\n') ]
                 except:
                     self.IDS = []
-            self.CHECK_TITLE_LIST()
+            self.CHECK_TITLE_LIST(sendUpdate = sendUpdate)
 
         def UPDATE_TITLE_LIST(self) -> None:
             fd.createFile('youtube/IDS.txt', '\n'.join(( json.dumps(a) for a in self.IDS )))
 
-        def CHECK_TITLE_LIST(self) -> None:
-            for song in self.IDS:
+        def CHECK_TITLE_LIST(self, *, sendUpdate = None) -> None:
+            IDS = self.IDS
+            self.IDS = []
+            reDownload = []
+            for song in IDS:
                 if not fd.isFile('./sources/youtube/%s.mp3' % song['id']):
-                    self.IDS.remove(song)
+                    reDownload.append(song)
+                else:
+                    self.IDS.append(song)
+            for song in reDownload:
+                threading.Thread(target = self.DOWNLOAD_TRACK, args = (song['id'],), kwargs = {'check_list': False, 'sendUpdate': sendUpdate,}, daemon = True).start()
             self.UPDATE_TITLE_LIST()
 
         ### Standardized methods ###
-        def DOWNLOAD_TRACK(self, id:str, hook = None) -> str:
+        def DOWNLOAD_TRACK(self, id:str, *, hook = None, check_list = True, sendUpdate = None) -> str:
             assert isinstance(id, str)
-            self.CHECK_TITLE_LIST()
-            if id in ( a['id'] for a in self.IDS ):
-                return os.path.abspath('./sources/youtube/%s.mp3' % id)
+            if check_list:
+                self.CHECK_TITLE_LIST()
+                if id in ( a['id'] for a in self.IDS ):
+                    return os.path.abspath('./sources/youtube/%s.mp3' % id)
             url = 'https://youtube.com/watch?v=%s' % id
             response = track_info.copy()
             response['id'] = id
             opts = self.ydl_opts.copy()
             if hook:
                 opts['progress_hooks'] = [hook]
-            for i in range(2):
+            for i in range(5):
                 try:
                     with youtube_dl.YoutubeDL(opts) as ydl:
                         info = ydl.extract_info(url, download = True)
@@ -67,15 +75,24 @@ class Source:
                         response['title'] = info.get('title')
                         response['artist'] = info.get('uploader')
                         response['thumbnail'] = info.get('thumbnail')
-                        self.IDS.append(response)
                     if not response['thumbnail'].endswith('jpg'):
                         image = PIL.Image.open('./sources/youtube/%s.%s' % (response['id'], response['thumbnail'].split('.')[-1])).convert('RGB')
                         image.save('./sources/youtube/%s.jpg' % response['id'], 'jpeg')
                         fd.deleteFile('youtube/%s.%s' % (response['id'], response['thumbnail'].split('.')[-1]))
+                    self.IDS.append(response)
                     self.UPDATE_TITLE_LIST()
+                    if sendUpdate:
+                        sendUpdate()
                     return os.path.abspath('./sources/youtube/%s.mp3' % id)
                 except:
                     pass
+            if not check_list:
+                for i in range(len(self.IDS)):
+                    if self.IDS[i]['id'] == id:
+                        self.IDS.pop(i)
+                        break
+            if sendUpdate:
+                sendUpdate()
             raise Exception('failed to download track')
 
         def LIST_TRACKS(self) -> list:

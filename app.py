@@ -5,12 +5,22 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
+con = None
+
 # Create GUI
 class GUI(Ui_MainWindow):
     def __init__(self, MainWindow):
+        global con
         self.MainWindow = MainWindow
 
+        # Triggers
+        self.underLyingButton = QPushButton()
+        self.underLyingButton.clicked.connect(lambda a : self.queueUpdate(True))
+        self.triggerMain = QPushButton()
+        self.triggerMain.clicked.connect(lambda a : self.fillMainWindow())
+
         # Abstract variables
+        con = Console(sendUpdate = self.triggerMain.clicked.emit) # Begin main thread for user
         self.providerName = 'youtube'
         self.provider = con._getProvider(self.providerName)
         self.queue = []
@@ -96,11 +106,6 @@ class GUI(Ui_MainWindow):
         self.clearButton.clicked.connect(self.clearQueue)
         self.shuffleButton.clicked.connect(self.shuffle)
         self.searchButton.clicked.connect(self.toggleSearch)
-
-        self.underLyingButton = QPushButton()
-        self.underLyingButton.clicked.connect(lambda a : self.queueUpdate(True))
-        self.triggerMain = QPushButton()
-        self.triggerMain.clicked.connect(lambda a : self.fillMainWindow())
 
         self.progressBar.sliderReleased.connect(self.updateDuration)
         self.volumeSlider.valueChanged.connect(self.updateVolume)
@@ -576,9 +581,6 @@ class GUI(Ui_MainWindow):
         self.queueUpdate()
 
 if __name__ == '__main__':
-    # Begin main thread for user
-    con = Console()
-
     # Discord RPC
     try:
         rpc = pypresence.Presence('874365581162328115')
