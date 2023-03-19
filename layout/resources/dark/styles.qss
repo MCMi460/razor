@@ -94,3 +94,16 @@ QScrollArea {
 QGroupBox#searchSection {
     background-color: #404040;
 }
+
+QMenu {
+    background-color: #404040;
+    border: 0px;
+    margin: 0;
+}
+QMenu::separator {
+    height: 0px;
+    width: 0px;
+}
+QMenu::item:selected {
+    background-color: #A00000;
+}

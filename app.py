@@ -24,7 +24,13 @@ class GUI(Ui_MainWindow):
             'id': '',
         }
 
+        # Events
+        # none thus far
+
     def setup(self):
+        # Main Window
+        self.MainWindow.setFixedSize(960, 600)
+
         # Queue Menu
         self.queueArea.hide()
         self.queueLayout = QGridLayout()
@@ -336,11 +342,23 @@ class GUI(Ui_MainWindow):
                 pix = QPixmap('sources/%s/%s.jpg' % (self.providerName, self.queue[i]))
                 label.setPixmap(pix)
                 label.setScaledContents(True)
-                label.mouseReleaseEvent = lambda event, i=i : self.next(i, True) if event.button() == Qt.LeftButton else None
+                label.mouseReleaseEvent = lambda event, i = i : self.next(i, True) if event.button() == Qt.LeftButton else None
                 label.setCursor(QCursor(Qt.PointingHandCursor))
                 self.queueLayout.addWidget(group)
                 y += 80
-            self.queueLayout.addItem(QSpacerItem(0,521))
+        # Fun little message
+        endg = QGroupBox()
+        endg.setStyleSheet('background-color: transparent;')
+        endg.move(0, y)
+        endg.setFixedSize(119, 50)
+        end = QLabel(endg)
+        end.setText('You\'ve reached the end!')
+        end.resize(109, 40)
+        end.setWordWrap(True)
+        end.setAlignment(Qt.AlignCenter)
+        self.queueLayout.addWidget(endg)
+        # Spacer
+        self.queueLayout.addItem(QSpacerItem(0,471))
 
     def toggleQueue(self):
         if self.queueArea.isVisible():
@@ -375,12 +393,23 @@ class GUI(Ui_MainWindow):
                 thumbnail.setScaledContents(True)
                 pix = QPixmap('sources/%s/%s.jpg' % (self.providerName, songs[n]['id']))
                 thumbnail.setPixmap(pix)
-                thumbnail.mouseReleaseEvent = lambda event, n=songs[n] : self.next(self.addToQueue(n['id'], 1), True) if event.button() == Qt.LeftButton else None
+                thumbnail.mouseReleaseEvent = lambda event, n = songs[n] : self.next(self.addToQueue(n['id'], 1), True) if event.button() == Qt.LeftButton else None
+                thumbnail.contextMenuEvent = lambda event, id = songs[n]['id'] : self.downloadedSongDropdown(event, id)
                 thumbnail.setCursor(QCursor(Qt.PointingHandCursor))
             self.musicLayout.addWidget(overlay)
             y += 122
         if rows <= 4:
             self.musicLayout.addItem(QSpacerItem(0, 107 * (4 - rows) + 15 * (4 - rows)))
+
+    def downloadedSongDropdown(self, event, id:str):
+        contextMenu = QMenu(self.MainWindow)
+        play = contextMenu.addAction('Play')
+        add = contextMenu.addAction('Add to queue')
+        action = contextMenu.exec_(event.globalPos())
+        if action == add:
+            self.addToQueue(id)
+        elif action == play:
+            self.next(self.addToQueue(id, 1), True)
 
 if __name__ == '__main__':
     # Begin main thread for user
