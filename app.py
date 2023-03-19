@@ -84,9 +84,9 @@ class GUI(Ui_MainWindow):
             with open('layout/resources/%s/styles.qss' % type, 'r') as file:
                 getattr(self, type + 'Images')['qss'] = file.read()
             for key in list(icons.keys()):
-                getattr(self, type + 'Images')[key] = QIcon(('layout/resources/%s/' % type) + icons[key])
+                getattr(self, type + 'Images')[key] = QIcon(getPath(('layout/resources/%s/' % type) + icons[key]))
             for key in list(pixmaps.keys()):
-                getattr(self, type + 'Images')[key] = QPixmap(('layout/resources/%s/' % type) + pixmaps[key])
+                getattr(self, type + 'Images')[key] = QPixmap(getPath(('layout/resources/%s/' % type) + pixmaps[key]))
 
         if con.config['darkMode']:
             self.theme = self.darkImages
@@ -248,7 +248,7 @@ class GUI(Ui_MainWindow):
             pix = self.theme['blankThumbnail']
         else:
             self.updatePresence(info)
-            pix = QPixmap('sources/%s/%s.jpg' % (self.providerName, id))
+            pix = QPixmap(os.path.abspath(os.path.join(fd.directory, '%s/%s.jpg' % (self.providerName, id))))
         self.thumbnailLabel.setPixmap(pix)
 
     def updatePresence(self, info:dict = {}):
@@ -371,7 +371,7 @@ class GUI(Ui_MainWindow):
                 label = QLabel(group)
                 label.move(5,5)
                 label.resize(109, 61)
-                pix = QPixmap('sources/%s/%s.jpg' % (self.providerName, self.queue[i]))
+                pix = QPixmap(os.path.abspath(os.path.join(fd.directory, '%s/%s.jpg' % (self.providerName, self.queue[i]))))
                 label.setPixmap(pix)
                 label.setScaledContents(True)
                 label.mouseReleaseEvent = lambda event, i = i : self.next(i, True) if event.button() == Qt.LeftButton else None
@@ -436,7 +436,7 @@ class GUI(Ui_MainWindow):
                     pix = QPixmap()
                     pix.loadFromData(requests.get(songs[n]['thumbnail']).content)
                 else:
-                    pix = QPixmap('sources/%s/%s.jpg' % (self.providerName, songs[n]['id']))
+                    pix = QPixmap(os.path.abspath(os.path.join(fd.directory, '%s/%s.jpg' % (self.providerName, songs[n]['id']))))
                 thumbnail.setPixmap(pix)
                 overPicture = QGroupBox(overlay)
                 overPicture.move(i * 191 + 15 * i, 0)

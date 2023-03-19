@@ -2,8 +2,8 @@
 
 youtube-dl
 python-vlc
-pyreadline3
 pyqt5
 pypresence
 Pillow
 requests
+chardet

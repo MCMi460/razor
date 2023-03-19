@@ -13,3 +13,12 @@ thumbs.db
 # Razor
 sources/
 config/
+
+# Build files
+*.spec
+build/
+dist/
+.eggs/
+
+# Development
+test*.*

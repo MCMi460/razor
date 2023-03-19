@@ -18,14 +18,22 @@ def getAppPath(): # Credit to @HotaruBlaze
             pass
     return applicationPath
 
+def getPath(path):
+    try:
+        root = sys._MEIPASS
+    except Exception:
+        root = os.path.abspath('.')
+
+    return os.path.join(root, path)
+
 appPath = getAppPath()
 
 class FileSystem():
     def __init__(self, directory:str = 'sources/') -> None:
         assert isinstance(directory, str)# or...
-        if not os.path.isdir(directory):
-            os.makedirs(directory)
         self.directory = os.path.join(appPath, directory)
+        if not os.path.isdir(self.directory):
+            os.makedirs(self.directory)
 
     def isFile(self, route:str) -> None:
         assert isinstance(route, str)
