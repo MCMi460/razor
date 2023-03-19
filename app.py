@@ -330,14 +330,14 @@ class GUI(Ui_MainWindow):
                 group = QGroupBox()
                 group.move(0, y)
                 group.setFixedSize(119, 71)
-                group.setCursor(QCursor(Qt.PointingHandCursor))
                 label = QLabel(group)
                 label.move(5,5)
                 label.resize(109, 61)
                 pix = QPixmap('sources/%s/%s.jpg' % (self.providerName, self.queue[i]))
                 label.setPixmap(pix)
                 label.setScaledContents(True)
-                label.mouseReleaseEvent = lambda event, i=i : self.next(i, True)
+                label.mouseReleaseEvent = lambda event, i=i : self.next(i, True) if event.button() == Qt.LeftButton else None
+                label.setCursor(QCursor(Qt.PointingHandCursor))
                 self.queueLayout.addWidget(group)
                 y += 80
             self.queueLayout.addItem(QSpacerItem(0,521))
@@ -375,7 +375,8 @@ class GUI(Ui_MainWindow):
                 thumbnail.setScaledContents(True)
                 pix = QPixmap('sources/%s/%s.jpg' % (self.providerName, songs[n]['id']))
                 thumbnail.setPixmap(pix)
-                thumbnail.mouseReleaseEvent = lambda event, n=songs[n] : self.next(self.addToQueue(n['id'], 1), True)
+                thumbnail.mouseReleaseEvent = lambda event, n=songs[n] : self.next(self.addToQueue(n['id'], 1), True) if event.button() == Qt.LeftButton else None
+                thumbnail.setCursor(QCursor(Qt.PointingHandCursor))
             self.musicLayout.addWidget(overlay)
             y += 122
         if rows <= 4:
