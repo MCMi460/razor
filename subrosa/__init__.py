@@ -12,6 +12,7 @@ import PIL.Image
 import requests
 if os.name == 'nt':
     os.add_dll_directory(os.getcwd())
+    os.add_dll_directory(r'C:\Program Files\VideoLAN\VLC')
     import pyreadline3
 else:
     import readline
