@@ -28,8 +28,9 @@ class Source:
                 'quiet': True,
                 'noplaylist': True,
                 'writethumbnail': True,
-                'ffmpeg_location': getPath('ffmpeg'),
             }
+            if os.name == 'nt':
+                self.ydl_opts['ffmpeg_location'] = getPath('ffmpeg')
             self.setupFinish = False
 
             fd.createDirectory('youtube')
