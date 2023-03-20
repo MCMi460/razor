@@ -441,7 +441,7 @@ class GUI(Ui_MainWindow):
                 thumbnail.setScaledContents(True)
                 if songs[n].get('online'):
                     pix = QPixmap()
-                    pix.loadFromData(requests.get(songs[n]['thumbnail']).content)
+                    pix.loadFromData(requests.get(songs[n]['thumbnail'], verify = False).content)
                 else:
                     pix = QPixmap(os.path.abspath(os.path.join(fd.directory, '%s/%s.jpg' % (self.providerName, songs[n]['id']))))
                 thumbnail.setPixmap(pix)

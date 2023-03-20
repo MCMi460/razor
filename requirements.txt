@@ -1,6 +1,6 @@
 # MCMi460 on Github
 
-youtube-dl
+youtube-dl @ git+https://github.com/ytdl-org/youtube-dl
 python-vlc
 pyqt5
 pypresence
