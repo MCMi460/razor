@@ -8,7 +8,7 @@ venv/
 thumbs.db
 *.dll
 ffmpeg/
-vlc/
+VLC/
 
 # macOS
 .DS_Store

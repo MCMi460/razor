@@ -11,15 +11,17 @@ import youtube_dl
 import PIL.Image
 import requests
 if os.name == 'nt':
-    os.add_dll_directory(os.getcwd())
-    #os.add_dll_directory(r'C:\Program Files\VideoLAN\VLC')
     import pyreadline3
 else:
     import readline
-import vlc
 
 # Source files
 from .files import *
+# Post-files import
+if os.name == 'nt':
+    os.add_dll_directory(getPath('VLC'))
+import vlc
+# Continue
 fd = FileSystem()
 from .sources import *
 from .console import *

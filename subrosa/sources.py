@@ -28,6 +28,7 @@ class Source:
                 'quiet': True,
                 'noplaylist': True,
                 'writethumbnail': True,
+                'ffmpeg_location': getPath('ffmpeg'),
             }
             self.setupFinish = False
 
