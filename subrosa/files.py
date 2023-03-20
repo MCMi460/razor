@@ -13,7 +13,7 @@ def getAppPath(): # Credit to @HotaruBlaze
             SHGFP_TYPE_CURRENT = 0 # Get current, not default value
             buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
             ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
-            applicationPath = os.path.join(buf.value, '3DS-RPC')
+            applicationPath = os.path.join(buf.value, 'Razor')
         except:
             pass
     return applicationPath

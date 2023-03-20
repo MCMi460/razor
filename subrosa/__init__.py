@@ -7,14 +7,15 @@ version = 0.3
 # Imports
 import os, sys, random, traceback, threading, time, json, math, webbrowser
 import youtube_dl
-import vlc
-import pypresence
+#import pypresence
 import PIL.Image
 import requests
 if os.name == 'nt':
+    os.add_dll_directory(os.getcwd())
     import pyreadline3
 else:
     import readline
+import vlc
 
 # Source files
 from .files import *

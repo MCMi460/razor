@@ -59,6 +59,8 @@ class GUI(Ui_MainWindow):
         self.end = QLabel()
 
         # Menu Bar
+        self.menuBar.move(0, 0)
+        self.menuBar.setFixedSize(960, 20)
         self.a_showSource.triggered.connect(lambda e : os.system('start %s' % appPath) if os.name == 'nt' else os.system('open %s' % appPath))
         self.a_closeApp.triggered.connect(self.MainWindow.close)
         self.a_issue.triggered.connect(lambda e : webbrowser.open('https://github.com/MCMi460/razor/issues/new'))
@@ -86,7 +88,7 @@ class GUI(Ui_MainWindow):
         self.darkImages = icons.copy() | pixmaps.copy()
         for type in ('light', 'dark'):
             # QSS Stylesheet (redundancy check?)
-            with open('layout/resources/%s/styles.qss' % type, 'r') as file:
+            with open(getPath('layout/resources/%s/styles.qss' % type), 'r') as file:
                 getattr(self, type + 'Images')['qss'] = file.read()
             for key in list(icons.keys()):
                 getattr(self, type + 'Images')[key] = QIcon(getPath(('layout/resources/%s/' % type) + icons[key]))
@@ -98,7 +100,7 @@ class GUI(Ui_MainWindow):
         else:
             self.theme = self.lightImages
 
-        self.movie = QMovie('layout/resources/loading.gif')
+        self.movie = QMovie(getPath('layout/resources/loading.gif'))
         self.loadingGif.setMovie(self.movie)
         self.loadingGif.setScaledContents(True)
 
@@ -594,6 +596,7 @@ class GUI(Ui_MainWindow):
 if __name__ == '__main__':
     # Discord RPC
     try:
+        raise Exception('not added yet') # Add Discord support another day
         rpc = pypresence.Presence('874365581162328115')
         rpc.connect()
         rpc.clear()

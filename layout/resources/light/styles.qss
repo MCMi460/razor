@@ -23,7 +23,7 @@ QPushButton#clearButton {
 
 QGroupBox {
     background-color: #CACACA;
-    border: 0px;
+    border: 0px solid transparent;
 }
 
 QLabel {
