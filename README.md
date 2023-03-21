@@ -1,3 +1,7 @@
+<p align = 'center'>
+  <img src = '/preview/banner.png' width = '300em' />
+</p>
+
 # <img src = '/layout/resources/logo.png?raw=true' height = '32px' style = 'margin-bottom: -5px;' /> Razor
 
 > *"A simple music player that takes your favorite songs from YouTube and lets you play them on your PC!"*
