@@ -285,7 +285,8 @@
      <property name="title">
       <string>Razor</string>
      </property>
-     <addaction name="a_Settings"/>
+     <addaction name="a_settings"/>
+     <addaction name="a_credits"/>
      <addaction name="a_closeApp"/>
     </widget>
     <widget class="QMenu" name="menuHelp">
@@ -360,11 +361,6 @@
          <width>381</width>
          <height>16</height>
         </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>11</pointsize>
-        </font>
        </property>
        <property name="text">
         <string/>
@@ -464,7 +460,6 @@
    </widget>
    <zorder>sidePlayer</zorder>
    <zorder>musicArea</zorder>
-   <zorder>statusbar</zorder>
    <zorder>queueArea</zorder>
    <zorder>clearButton</zorder>
    <zorder>topMenu</zorder>
@@ -487,9 +482,14 @@
     <string>File an issue</string>
    </property>
   </action>
-  <action name="a_Settings">
+  <action name="a_settings">
    <property name="text">
     <string>Settings</string>
+   </property>
+  </action>
+  <action name="a_credits">
+   <property name="text">
+    <string>Credits</string>
    </property>
   </action>
  </widget>

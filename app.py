@@ -1,6 +1,7 @@
 # MCMi460 on Github
 from subrosa import *
 from layout import Ui_MainWindow
+from layout.credits import Ui_Credits
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -61,8 +62,12 @@ class GUI(Ui_MainWindow):
         # Menu Bar
         self.menuBar.move(0, 0)
         self.menuBar.setFixedSize(960, 20)
-        self.a_showSource.triggered.connect(lambda e : os.system('start %s' % appPath) if os.name == 'nt' else os.system('open %s' % appPath))
+        # Razor
+        self.a_credits.triggered.connect(self.showCredits)
         self.a_closeApp.triggered.connect(self.MainWindow.close)
+        # File
+        self.a_showSource.triggered.connect(lambda e : os.system('start %s' % appPath) if os.name == 'nt' else os.system('open %s' % appPath))
+        # Help
         self.a_issue.triggered.connect(lambda e : webbrowser.open('https://github.com/MCMi460/razor/issues/new'))
 
         # Images
@@ -592,6 +597,31 @@ class GUI(Ui_MainWindow):
         for song in self.queue[start:]:
             self.queue.remove(song)
         self.queueUpdate()
+
+    def showCredits(self):
+        window = Credits()
+        window.dialog.setStyleSheet(self.darkImages['qss'])
+        window.dialog.exec_()
+
+class Credits(Ui_Credits):
+    def __init__(self):
+        self.dialog = QDialog()
+        self.setupUi(self.dialog)
+
+        self.dialog.setFixedSize(600, 400)
+
+        self.imageLabel.setPixmap(QPixmap(getPath(('layout/resources/emblem.png'))))
+        self.imageLabel.setScaledContents(True)
+
+        self.versionLabel.setText('Razor v%s' % version)
+
+        self.gitLink.mouseReleaseEvent = lambda e : self.openLink('https://github.com/MCMi460/razor')
+
+        self.mrgamedood.mouseReleaseEvent = lambda e : self.openLink('https://www.youtube.com/@mrgamecub3')
+        self.deltaboi.mouseReleaseEvent = lambda e : self.openLink('https://github.com/MCMi460')
+
+    def openLink(self, url:str):
+        webbrowser.open(url)
 
 if __name__ == '__main__':
     # Discord RPC
