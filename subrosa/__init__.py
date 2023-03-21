@@ -19,7 +19,8 @@ else:
 from .files import *
 # Post-files import
 if os.name == 'nt':
-    os.add_dll_directory(getPath('VLC'))
+    os.add_dll_directory(os.getcwd())
+    #os.add_dll_directory(getPath('VLC'))
 import vlc
 # Continue
 fd = FileSystem()
