@@ -10,3 +10,5 @@ Razor is exactly what it sounds like – but *better*. It downloads songs from Y
 
 **But how do I use it?**  
 Here's the thing: We don't even have to tell you. Just download the [windows.zip or mac.zip](https://github.com/MCMi460/razor/releases/latest) onto your computer and run! It's as simple as that!
+
+If you'd like to chat more about Razor, suggest new features, point out bugs, or get support, you can join [our Discord server here](https://discord.gg/KxUEqFRvwF).
