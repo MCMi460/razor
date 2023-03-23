@@ -7,6 +7,7 @@ version = 1.0
 # Imports
 import os, sys, random, traceback, threading, time, json, math, webbrowser
 import youtube_dl
+from sdl2 import sdlmixer as mix
 #import pypresence
 import PIL.Image
 import requests
@@ -17,12 +18,7 @@ else:
 
 # Source files
 from .files import *
-# Post-files import
-if os.name == 'nt':
-    os.add_dll_directory(os.getcwd())
-    #os.add_dll_directory(getPath('VLC'))
-import vlc
-# Continue
 fd = FileSystem()
+from .audio import *
 from .sources import *
 from .console import *

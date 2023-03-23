@@ -376,13 +376,13 @@
         </rect>
        </property>
        <property name="minimum">
-        <number>30</number>
+        <number>0</number>
        </property>
        <property name="maximum">
-        <number>180</number>
+        <number>128</number>
        </property>
        <property name="value">
-        <number>100</number>
+        <number>64</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

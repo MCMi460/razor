@@ -156,7 +156,7 @@ class GUI(Ui_MainWindow):
 
     def _constantPlay(self, provider, id):
         con.play(provider, id, False)
-        con.track['media'].audio_set_volume(self.volumeSlider.value())
+        con.track['media'].set_volume(self.volumeSlider.value())
         while con.track['media'] and not con.track['media'].is_playing():
             pass
         threading.Thread(target = self.updateMeta, args = (id,), daemon = True).start()
@@ -164,7 +164,7 @@ class GUI(Ui_MainWindow):
         self.progressBar.setMaximum(con.track['media'].get_length())
         threading.Thread(target = self.updateProgressBar, daemon = True).start()
         self.playButton.setIcon(self.theme['pauseImage'])
-        while con.track['media'] and con.track['media'].get_state() in (vlc.State.Playing, vlc.State.Paused):
+        while con.track['media'] and con.track['media'].get_state() in (AudioState.Playing, AudioState.Paused):
             pass
         if con.track['media']:
             self.next()
@@ -285,7 +285,7 @@ class GUI(Ui_MainWindow):
             if connected and self.provider.setupFinish: rpc.update(**dict)
 
     def updateProgressBar(self):
-        while con.track['media'] and con.track['media'].get_state() in (vlc.State.Playing, vlc.State.Paused):
+        while con.track['media'] and con.track['media'].get_state() in (AudioState.Playing, AudioState.Paused):
             self.progressBar.setValue(con.track['media'].get_time())
             time.sleep(1)
 
@@ -357,7 +357,7 @@ class GUI(Ui_MainWindow):
 
     def updateVolume(self):
         if con.track['media']:
-            con.track['media'].audio_set_volume(self.volumeSlider.value())
+            con.track['media'].set_volume(self.volumeSlider.value())
 
     def emptyLayout(self, layout):
         if layout:
@@ -645,4 +645,6 @@ if __name__ == '__main__':
 
     MainWindow.show()
 
-    sys.exit(app.exec_())
+    app.exec_()
+    mix.Mix_Quit()
+    sys.exit()
