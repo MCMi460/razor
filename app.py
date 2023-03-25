@@ -31,6 +31,7 @@ class GUI(Ui_MainWindow):
         self.searching = False
         self.searchResults = []
         self.sliding = False
+        self.downloading = []
 
         self.cache = {
             'title': '',
@@ -167,7 +168,11 @@ class GUI(Ui_MainWindow):
         self.underLyingButton.clicked.emit()
 
     def _constantPlay(self, provider, id):
+        while id in self.downloading:
+            pass
+        self.downloading.append(id)
         con.play(provider, id, False)
+        self.downloading.remove(id)
         con.track['media'].set_volume(self.volumeSlider.value())
         while con.track['media'] and not con.track['media'].is_playing():
             pass
@@ -176,8 +181,7 @@ class GUI(Ui_MainWindow):
         length = con.track['media'].get_length()
         self.progressBar.setMaximum(length)
         self.sliding = False
-        min, sec = divmod(length / 1000, 60)
-        self.endTime.setText('%s:%s' % (int(min), str(int(sec)).zfill(2)))
+        self.endTime.setText(self.convertToTimestamp(length))
         threading.Thread(target = self.updateProgressBar, daemon = True).start()
         self.playButton.setIcon(self.theme['pauseImage'])
         while con.track['media'] and con.track['media'].get_state() in (Audio.State.Playing, Audio.State.Paused):
@@ -306,10 +310,9 @@ class GUI(Ui_MainWindow):
     def updateProgressBar(self):
         while con.track['media'] and con.track['media'].get_state() in (Audio.State.Playing, Audio.State.Paused):
             currentDuration = con.track['media'].get_time()
-            min, sec = divmod(currentDuration / 1000, 60)
             if not self.sliding:
                 self.progressBar.setValue(currentDuration)
-            self.currentTime.setText('%s:%s' % (int(min), str(int(sec)).zfill(2)))
+            self.currentTime.setText(self.convertToTimestamp(currentDuration))
             time.sleep(0.5)
 
     def updateDuration(self):
@@ -321,8 +324,11 @@ class GUI(Ui_MainWindow):
         self.sliding = False
 
     def updatePosition(self, event):
-        if con.track['media'] and con.track['media'].is_playing() and not self.progressBar.isSliderDown():
-            con.track['media'].set_time(QStyle.sliderValueFromPosition(self.progressBar.minimum(), self.progressBar.maximum(), event.y(), self.progressBar.height()))
+        if con.track['media'] and not con.track['media'].get_state() == Audio.State.Stopped and not self.progressBar.isSliderDown():
+            duration = QStyle.sliderValueFromPosition(self.progressBar.minimum(), self.progressBar.maximum(), event.y(), self.progressBar.height())
+            con.track['media'].set_time(duration)
+            self.currentTime.setText(self.convertToTimestamp(duration))
+            self.progressBar.setValue(duration)
         self.progressBar.setSliderDown(False)
 
     def toggleTheme(self):
@@ -577,7 +583,11 @@ class GUI(Ui_MainWindow):
             self.next(self.addToQueue(id, 1), True)
         elif action == download:
             def download():
+                while id in self.downloading:
+                    pass
+                self.downloading.append(id)
                 self.provider.DOWNLOAD_TRACK(id)
+                self.downloading.remove(id)
                 self.triggerMain.clicked.emit()
             threading.Thread(target = download, daemon = True).start()
 
@@ -640,6 +650,10 @@ class GUI(Ui_MainWindow):
         self.stop(True)
         event.accept()
         sys.exit()
+
+    def convertToTimestamp(self, milliseconds:int):
+        min, sec = divmod(milliseconds / 1000, 60)
+        return '%s:%s' % (int(min), str(int(sec)).zfill(2))
 
 class Credits(Ui_Credits):
     def __init__(self):
