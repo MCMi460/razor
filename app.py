@@ -3,6 +3,7 @@ from subrosa import *
 from layout import Ui_MainWindow
 from layout.credits import Ui_Credits
 from layout.terms import Ui_Terms
+from layout.miniplayer import Ui_Mini
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -89,6 +90,7 @@ class GUI(Ui_MainWindow):
             'queueImage': 'queue.png',
             'searchImage': 'search.png',
             'homeImage': 'home.png',
+            'picture': 'picture.png',
         }
         pixmaps = {
             'blankThumbnail': 'thumbnail.png',
@@ -140,6 +142,11 @@ class GUI(Ui_MainWindow):
 
         self.terms()
 
+    def miniplayer(self):
+        window = MiniPlayer(self)
+        window.window.setStyleSheet(self.theme['qss'])
+        window.window.exec_()
+
     def terms(self):
         if not con.config['acceptedTerms;%s' % version]:
             window = Terms()
@@ -176,6 +183,7 @@ class GUI(Ui_MainWindow):
         self.downloading.append(id)
         con.play(provider, id, False)
         self.downloading.remove(id)
+        self.triggerMain.clicked.emit()
         con.track['media'].set_volume(self.volumeSlider.value())
         while con.track['media'] and not con.track['media'].is_playing():
             pass
@@ -280,6 +288,9 @@ class GUI(Ui_MainWindow):
         else:
             info = self.provider.TRACK_INFO(con.track['id'])
         self.titleLabel.setText(info['title'])
+        #metric = QFontMetricsF(self.titleLabel.font())
+        #width = metric.width(info['title'])
+        #while metric
         self.uploaderLabel.setText(info['artist'])
         if not id:
             if connected and self.provider.setupFinish: rpc.clear()
@@ -451,6 +462,7 @@ class GUI(Ui_MainWindow):
         self.queueLayout.addItem(QSpacerItem(0,471))
 
     def toggleQueue(self, event, hide = False):
+        #self.miniplayer()
         if self.queueArea.isVisible() or hide:
             self.queueArea.hide()
             self.clearButton.hide()
@@ -704,6 +716,15 @@ class Terms(Ui_Terms):
         event.accept()
         if not con.config['acceptedTerms;%s' % version]:
             sys.exit()
+
+class MiniPlayer(Ui_Mini):
+    def __init__(self, parent):
+        self.parent = parent
+
+        self.window = QDialog()
+        self.setupUi(self.window)
+
+        self.window.setFixedSize(427, 240)
 
 if __name__ == '__main__':
     # Discord RPC

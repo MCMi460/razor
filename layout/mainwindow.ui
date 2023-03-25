@@ -399,6 +399,11 @@
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Arial</family>
+        </font>
+       </property>
        <property name="text">
         <string/>
        </property>
@@ -411,6 +416,11 @@
          <width>381</width>
          <height>16</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Arial</family>
+        </font>
        </property>
        <property name="text">
         <string/>
