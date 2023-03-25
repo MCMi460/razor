@@ -27,14 +27,12 @@ class Audio:
             mix.Mix_PlayMusic(self.music, 0)
 
         def pause(self) -> None:
-            print('test')
             mix.Mix_PauseMusic()
 
         def resume(self) -> None:
             mix.Mix_ResumeMusic()
 
         def stop(self) -> None:
-            print('stopping')
             mix.Mix_HaltMusic()
             mix.Mix_FreeMusic(self.music)
             self.music = None

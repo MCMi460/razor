@@ -125,6 +125,7 @@ class GUI(Ui_MainWindow):
 
         self.progressBar.sliderPressed.connect(self.pauseProgress)
         self.progressBar.sliderReleased.connect(self.updateDuration)
+        self.progressBar.mouseReleaseEvent = self.updatePosition
         self.volumeSlider.valueChanged.connect(self.updateVolume)
 
         self.searchBar.returnPressed.connect(self.searchFinish)
@@ -309,6 +310,11 @@ class GUI(Ui_MainWindow):
         else:
             self.stop()
         self.sliding = False
+    
+    def updatePosition(self, event):
+        if con.track['media'] and con.track['media'].is_playing() and not self.progressBar.isSliderDown():
+            con.track['media'].set_time(QStyle.sliderValueFromPosition(self.progressBar.minimum(), self.progressBar.maximum(), event.y(), self.progressBar.height()))
+        self.progressBar.setSliderDown(False)
 
     def toggleTheme(self):
         if self.theme == self.lightImages:

@@ -2,6 +2,7 @@
 
 youtube-dl @ git+https://github.com/ytdl-org/youtube-dl
 pysdl2
+pysdl2-dll
 pyqt5
 pypresence
 Pillow
