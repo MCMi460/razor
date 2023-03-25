@@ -2,6 +2,7 @@
 from subrosa import *
 from layout import Ui_MainWindow
 from layout.credits import Ui_Credits
+from layout.terms import Ui_Terms
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -132,6 +133,14 @@ class GUI(Ui_MainWindow):
 
         self.themeUpdate()
         self.fillMainWindow()
+
+        self.terms()
+
+    def terms(self):
+        if not con.config['acceptedTerms;%s' % version]:
+            window = Terms()
+            window.dialog.setStyleSheet(self.theme['qss'])
+            window.dialog.exec_()
 
     def toggle(self):
         if con.track['media'] and con.track['media'].is_playing():
@@ -310,7 +319,7 @@ class GUI(Ui_MainWindow):
         else:
             self.stop()
         self.sliding = False
-    
+
     def updatePosition(self, event):
         if con.track['media'] and con.track['media'].is_playing() and not self.progressBar.isSliderDown():
             con.track['media'].set_time(QStyle.sliderValueFromPosition(self.progressBar.minimum(), self.progressBar.maximum(), event.y(), self.progressBar.height()))
@@ -630,6 +639,7 @@ class GUI(Ui_MainWindow):
     def closeEvent(self, event):
         self.stop(True)
         event.accept()
+        sys.exit()
 
 class Credits(Ui_Credits):
     def __init__(self):
@@ -651,6 +661,30 @@ class Credits(Ui_Credits):
     def openLink(self, url:str):
         webbrowser.open(url)
 
+class Terms(Ui_Terms):
+    def __init__(self):
+        self.dialog = QDialog()
+        self.setupUi(self.dialog)
+
+        self.dialog.setFixedSize(600, 400)
+
+        self.versionLabel.setText('Razor v%s Terms Document' % version)
+
+        self.declineButton.clicked.connect(self.dialog.close)
+        self.acceptButton.clicked.connect(self.accept)
+
+        self.dialog.closeEvent = self.closeEvent
+
+    def accept(self):
+        con.config['acceptedTerms;%s' % version] = True
+        con._updateConfig()
+        self.dialog.close()
+
+    def closeEvent(self, event):
+        event.accept()
+        if not con.config['acceptedTerms;%s' % version]:
+            sys.exit()
+
 if __name__ == '__main__':
     # Discord RPC
     try:
@@ -664,6 +698,7 @@ if __name__ == '__main__':
 
     # Main Window
     app = QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(False)
 
     MainWindow = QMainWindow()
     window = GUI(MainWindow)

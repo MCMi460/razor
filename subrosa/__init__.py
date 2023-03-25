@@ -2,7 +2,7 @@
 # Track Handling, Sub-Rosa
 
 # Version
-version = 1.0
+version = 1.01
 
 # Imports
 import os, sys, random, traceback, threading, time, json, math, webbrowser, inspect

@@ -21,6 +21,7 @@ track = {
 # Config format
 configTemplate = {
     'darkMode': False,
+    'acceptedTerms;%s' % version: False,
 }
 
 class Console():
@@ -48,6 +49,9 @@ class Console():
                 self.config = json.loads(fd.readFile('config.txt'))
             except:
                 pass
+            for key in configTemplate.keys():
+                if not key in self.config:
+                    self.config[key] = configTemplate[key]
         self._updateConfig()
 
     def _main(self):
