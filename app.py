@@ -73,6 +73,9 @@ class GUI(Ui_MainWindow):
         # Help
         self.a_issue.triggered.connect(lambda e : webbrowser.open('https://github.com/MCMi460/razor/issues/new'))
 
+        # Volume
+        self.volumeSlider.setValue(con.config['volume'])
+
         # Images
         icons = {
             'playImage': 'play.png',
@@ -391,8 +394,11 @@ class GUI(Ui_MainWindow):
         ### STYLESHEET END ###
 
     def updateVolume(self):
+        vol = self.volumeSlider.value()
         if con.track['media']:
-            con.track['media'].set_volume(self.volumeSlider.value())
+            con.track['media'].set_volume(vol)
+        con.config['volume'] = vol
+        con._updateConfig()
 
     def pauseProgress(self):
         if con.track['media']:

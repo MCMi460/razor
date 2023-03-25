@@ -22,6 +22,7 @@ track = {
 configTemplate = {
     'darkMode': False,
     'acceptedTerms;%s' % version: False,
+    'volume': 64,
 }
 
 class Console():
