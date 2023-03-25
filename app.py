@@ -29,6 +29,7 @@ class GUI(Ui_MainWindow):
         self.looping = False
         self.searching = False
         self.searchResults = []
+        self.sliding = False
 
         self.cache = {
             'title': '',
@@ -38,7 +39,7 @@ class GUI(Ui_MainWindow):
         }
 
         # Events
-        # none thus far
+        self.MainWindow.closeEvent = self.closeEvent
 
     def setup(self):
         # Main Window
@@ -122,6 +123,7 @@ class GUI(Ui_MainWindow):
         self.shuffleButton.clicked.connect(self.shuffle)
         self.searchButton.clicked.connect(self.toggleSearch)
 
+        self.progressBar.sliderPressed.connect(self.pauseProgress)
         self.progressBar.sliderReleased.connect(self.updateDuration)
         self.volumeSlider.valueChanged.connect(self.updateVolume)
 
@@ -138,7 +140,7 @@ class GUI(Ui_MainWindow):
             self.play()
 
     def play(self, id = None):
-        if con.track['media'] and con.track['media'].get_state() == vlc.State.Paused:
+        if con.track['media'] and con.track['media'].get_state() == Audio.State.Paused:
             self.resume()
         elif con.track == track:
             con.track['provider'] = True
@@ -161,10 +163,14 @@ class GUI(Ui_MainWindow):
             pass
         threading.Thread(target = self.updateMeta, args = (id,), daemon = True).start()
         self.progressBar.setValue(0)
-        self.progressBar.setMaximum(con.track['media'].get_length())
+        length = con.track['media'].get_length()
+        self.progressBar.setMaximum(length)
+        self.sliding = False
+        min, sec = divmod(length / 1000, 60)
+        self.endTime.setText('%s:%s' % (int(min), str(int(sec)).zfill(2)))
         threading.Thread(target = self.updateProgressBar, daemon = True).start()
         self.playButton.setIcon(self.theme['pauseImage'])
-        while con.track['media'] and con.track['media'].get_state() in (AudioState.Playing, AudioState.Paused):
+        while con.track['media'] and con.track['media'].get_state() in (Audio.State.Playing, Audio.State.Paused):
             pass
         if con.track['media']:
             self.next()
@@ -212,14 +218,17 @@ class GUI(Ui_MainWindow):
         self.queueUpdate()
         return pos if len(self.queue) > 1 else 0
 
-    def stop(self):
+    def stop(self, closing = False):
         try:
             con.stop()
         except:
             pass
-        self.progressBar.setValue(0)
-        self.playButton.setIcon(self.theme['playImage'])
-        self.updateMeta()
+        if not closing:
+            self.progressBar.setValue(0)
+            self.currentTime.setText('0:00')
+            self.endTime.setText('0:00')
+            self.playButton.setIcon(self.theme['playImage'])
+            self.updateMeta()
 
     def pause(self):
         con.pause()
@@ -285,9 +294,13 @@ class GUI(Ui_MainWindow):
             if connected and self.provider.setupFinish: rpc.update(**dict)
 
     def updateProgressBar(self):
-        while con.track['media'] and con.track['media'].get_state() in (AudioState.Playing, AudioState.Paused):
-            self.progressBar.setValue(con.track['media'].get_time())
-            time.sleep(1)
+        while con.track['media'] and con.track['media'].get_state() in (Audio.State.Playing, Audio.State.Paused):
+            currentDuration = con.track['media'].get_time()
+            min, sec = divmod(currentDuration / 1000, 60)
+            if not self.sliding:
+                self.progressBar.setValue(currentDuration)
+            self.currentTime.setText('%s:%s' % (int(min), str(int(sec)).zfill(2)))
+            time.sleep(0.5)
 
     def updateDuration(self):
         if con.track['media']:
@@ -295,6 +308,7 @@ class GUI(Ui_MainWindow):
             self.updatePresence()
         else:
             self.stop()
+        self.sliding = False
 
     def toggleTheme(self):
         if self.theme == self.lightImages:
@@ -358,6 +372,10 @@ class GUI(Ui_MainWindow):
     def updateVolume(self):
         if con.track['media']:
             con.track['media'].set_volume(self.volumeSlider.value())
+
+    def pauseProgress(self):
+        if con.track['media']:
+            self.sliding = True
 
     def emptyLayout(self, layout):
         if layout:
@@ -602,6 +620,10 @@ class GUI(Ui_MainWindow):
         window = Credits()
         window.dialog.setStyleSheet(self.darkImages['qss'])
         window.dialog.exec_()
+
+    def closeEvent(self, event):
+        self.stop(True)
+        event.accept()
 
 class Credits(Ui_Credits):
     def __init__(self):

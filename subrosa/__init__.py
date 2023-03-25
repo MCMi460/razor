@@ -5,7 +5,7 @@
 version = 1.0
 
 # Imports
-import os, sys, random, traceback, threading, time, json, math, webbrowser
+import os, sys, random, traceback, threading, time, json, math, webbrowser, inspect
 import youtube_dl
 from sdl2 import sdlmixer as mix
 #import pypresence

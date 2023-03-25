@@ -152,4 +152,4 @@ class Source:
                         fd.deleteFile('youtube/%s.%s' % (song['id'], ext))
 
     def PLAY_TRACK(PROVIDER:object, id:str):
-        return AudioPlayer(PROVIDER.DOWNLOAD_TRACK(id))
+        return Audio.Player(PROVIDER.DOWNLOAD_TRACK(id))

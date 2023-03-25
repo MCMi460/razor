@@ -139,7 +139,7 @@ class Console():
         Plays a track from an ID and a specified provider
         """
         if not provider and not id and self.track['media'] and not self.track['media'].is_playing():
-            self.track['media'].set_pause(0)
+            self.track['media'].resume()
             return self._log('Resumed %s' % self.track['id'], Color.GREEN)
         elif not provider and not id and self.track['media']:
             return self._log('This song is still playing!', Color.RED)
