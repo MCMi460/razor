@@ -62,6 +62,12 @@
      <property name="maximum">
       <number>1000</number>
      </property>
+     <property name="singleStep">
+      <number>0</number>
+     </property>
+     <property name="pageStep">
+      <number>0</number>
+     </property>
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>

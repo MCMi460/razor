@@ -30,6 +30,8 @@ class Ui_MainWindow(object):
         self.progressBar = QtWidgets.QSlider(self.sidePlayer)
         self.progressBar.setGeometry(QtCore.QRect(10, 60, 31, 501))
         self.progressBar.setMaximum(1000)
+        self.progressBar.setSingleStep(0)
+        self.progressBar.setPageStep(0)
         self.progressBar.setOrientation(QtCore.Qt.Vertical)
         self.progressBar.setInvertedAppearance(True)
         self.progressBar.setTickInterval(1000)
