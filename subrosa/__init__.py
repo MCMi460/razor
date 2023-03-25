@@ -6,7 +6,7 @@ version = 1.01
 
 # Imports
 import os, sys, random, traceback, threading, time, json, math, webbrowser, inspect
-import youtube_dl
+import yt_dlp
 from sdl2 import sdlmixer as mix
 #import pypresence
 import PIL.Image

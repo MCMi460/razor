@@ -84,7 +84,7 @@ class Source:
                 opts['progress_hooks'] = [hook]
             for i in range(5):
                 try:
-                    with youtube_dl.YoutubeDL(opts) as ydl:
+                    with yt_dlp.YoutubeDL(opts) as ydl:
                         info = ydl.extract_info(url, download = True)
                         response['id'] = info.get('id')
                         response['title'] = info.get('title')
@@ -127,7 +127,7 @@ class Source:
             response['id'] = id
             for i in range(2):
                 try:
-                    with youtube_dl.YoutubeDL(self.ydl_opts) as ydl:
+                    with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
                         info = ydl.extract_info(url, download = False)
                         response['id'] = info.get('id')
                         response['title'] = info.get('title')
@@ -140,7 +140,7 @@ class Source:
 
         def SEARCH(self, terms:str, *, cutoff:int = 10) -> list:
             assert isinstance(terms, str) and isinstance(cutoff, int)
-            with youtube_dl.YoutubeDL(self.ydl_opts) as ydl:
+            with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
                 return ydl.extract_info('ytsearch%s:%s' % (cutoff, terms), download = False)['entries']
 
         def DELETE_TRACK(self, id:str) -> None:
