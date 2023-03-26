@@ -23,6 +23,7 @@ configTemplate = {
     'darkMode': False,
     'acceptedTerms;%s' % version: False,
     'volume': 64,
+    'fontOffset': 0,
 }
 
 class Console():

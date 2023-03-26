@@ -4,6 +4,7 @@ from layout import Ui_MainWindow
 from layout.credits import Ui_Credits
 from layout.terms import Ui_Terms
 from layout.miniplayer import Ui_Mini
+from layout.settings import Ui_Settings
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -68,6 +69,7 @@ class GUI(Ui_MainWindow):
         self.menuBar.move(0, 0)
         self.menuBar.setFixedSize(960, 20)
         # Razor
+        self.a_settings.triggered.connect(self.showSettings)
         self.a_credits.triggered.connect(self.showCredits)
         self.a_closeApp.triggered.connect(self.MainWindow.close)
         # File
@@ -140,6 +142,7 @@ class GUI(Ui_MainWindow):
 
         self.themeUpdate()
         self.fillMainWindow()
+        self.updateFont()
 
         self.terms()
 
@@ -329,6 +332,7 @@ class GUI(Ui_MainWindow):
         width = metric.width(self.titleLabel.text())
         num = self.songSinceStartUp
         direction = -1
+        self.titleLabel.adjustSize()
         while con.track['media'] and con.track['media'].get_state() in (Audio.State.Playing, Audio.State.Paused):
             if num != self.songSinceStartUp:
                 break
@@ -688,6 +692,16 @@ class GUI(Ui_MainWindow):
         window.dialog.setStyleSheet(self.darkImages['qss'])
         window.dialog.exec_()
 
+    def showSettings(self):
+        window = Settings(self)
+        window.dialog.setStyleSheet(self.theme['qss'])
+        window.dialog.exec_()
+
+    def updateFont(self):
+        font = QFont('Arial', (10 if os.name == 'nt' else 13) + con.config['fontOffset'])
+        app.setFont(font, 'QLabel')
+        app.setFont(font, 'QPushButton')
+
     def closeEvent(self, event):
         self.stop(True)
         event.accept()
@@ -750,6 +764,27 @@ class MiniPlayer(Ui_Mini):
 
         self.window.setFixedSize(427, 240)
 
+class Settings(Ui_Settings):
+    def __init__(self, parent):
+        self.parent = parent
+
+        self.dialog = QDialog()
+        self.setupUi(self.dialog)
+
+        self.dialog.setFixedSize(600, 400)
+
+        self.fontSize.setValue(con.config['fontOffset'] + 13)
+
+        self.fontSize.valueChanged.connect(self.update)
+
+    def update(self):
+        # Save values
+        con.config['fontOffset'] = self.fontSize.value() - 13
+        con._updateConfig()
+
+        # Runtime changes
+        self.parent.updateFont()
+
 if __name__ == '__main__':
     # Discord RPC
     try:
@@ -764,9 +799,6 @@ if __name__ == '__main__':
     # Main Window
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
-    font = QFont('Arial', 10 if os.name == 'nt' else 13)
-    app.setFont(font, 'QLabel')
-    app.setFont(font, 'QPushButton')
 
     MainWindow = QMainWindow()
     window = GUI(MainWindow)
