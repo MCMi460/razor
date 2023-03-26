@@ -49,6 +49,7 @@ class GUI(Ui_MainWindow):
     def setup(self):
         # Main Window
         self.MainWindow.setFixedSize(960, 600)
+        self.MainWindow.setWindowIcon(QIcon(getPath('layout/resources/logo.ico')))
 
         # Top Menu
         self.topMenu.setCurrentIndex(0)
