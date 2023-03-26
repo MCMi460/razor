@@ -7,6 +7,10 @@ version = 1.01
 # Imports
 import os, sys, random, traceback, threading, time, json, math, webbrowser, inspect
 import yt_dlp
+try:
+    os.environ['PYSDL2_DLL_PATH'] = sys._MEIPASS
+except:
+    pass
 from sdl2 import sdlmixer as mix
 #import pypresence
 import requests
