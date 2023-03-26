@@ -9,7 +9,6 @@ import os, sys, random, traceback, threading, time, json, math, webbrowser, insp
 import yt_dlp
 from sdl2 import sdlmixer as mix
 #import pypresence
-import PIL.Image
 import requests
 if os.name == 'nt':
     import pyreadline3

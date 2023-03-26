@@ -50,6 +50,9 @@
     <property name="title">
      <string/>
     </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
     <widget class="QSlider" name="progressBar">
      <property name="geometry">
       <rect>
@@ -390,37 +393,14 @@
         <string/>
        </property>
       </widget>
-      <widget class="QLabel" name="titleLabel">
-       <property name="geometry">
-        <rect>
-         <x>130</x>
-         <y>20</y>
-         <width>371</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Arial</family>
-        </font>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
       <widget class="QLabel" name="uploaderLabel">
        <property name="geometry">
         <rect>
          <x>130</x>
-         <y>40</y>
+         <y>50</y>
          <width>381</width>
          <height>16</height>
         </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Arial</family>
-        </font>
        </property>
        <property name="text">
         <string/>
@@ -476,6 +456,51 @@
        <property name="text">
         <string/>
        </property>
+      </widget>
+      <widget class="QScrollArea" name="titleArea">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>20</y>
+         <width>381</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <widget class="QWidget" name="titleContents">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>379</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: transparent;</string>
+        </property>
+        <widget class="QLabel" name="titleLabel">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>600</width>
+           <height>25</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </widget>
       </widget>
      </widget>
     </widget>

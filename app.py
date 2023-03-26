@@ -33,6 +33,7 @@ class GUI(Ui_MainWindow):
         self.searchResults = []
         self.sliding = False
         self.downloading = []
+        self.songSinceStartUp = 0
 
         self.cache = {
             'title': '',
@@ -161,6 +162,7 @@ class GUI(Ui_MainWindow):
             self.play()
 
     def play(self, id = None):
+        self.songSinceStartUp += 1
         if con.track['media'] and con.track['media'].get_state() == Audio.State.Paused:
             self.resume()
         elif con.track == track:
@@ -288,9 +290,6 @@ class GUI(Ui_MainWindow):
         else:
             info = self.provider.TRACK_INFO(con.track['id'])
         self.titleLabel.setText(info['title'])
-        #metric = QFontMetricsF(self.titleLabel.font())
-        #width = metric.width(info['title'])
-        #while metric
         self.uploaderLabel.setText(info['artist'])
         if not id:
             if connected and self.provider.setupFinish: rpc.clear()
@@ -322,12 +321,37 @@ class GUI(Ui_MainWindow):
             if connected and self.provider.setupFinish: rpc.update(**dict)
 
     def updateProgressBar(self):
+        scrolled = 0
+        tScroll = 0
+        cur = 0
+        nex = 0
+        metric = QFontMetricsF(self.titleLabel.font())
+        width = metric.width(self.titleLabel.text())
+        num = self.songSinceStartUp
+        direction = -1
         while con.track['media'] and con.track['media'].get_state() in (Audio.State.Playing, Audio.State.Paused):
+            if num != self.songSinceStartUp:
+                break
             currentDuration = con.track['media'].get_time()
             if not self.sliding:
                 self.progressBar.setValue(currentDuration)
             self.currentTime.setText(self.convertToTimestamp(currentDuration))
-            time.sleep(0.5)
+            if width > 380 and width - 380 + 50 > scrolled and nex <= 20:
+                if width - 380 > scrolled and cur >= 20:
+                    self.titleContents.scroll(direction, 0)
+                    scrolled += 1
+                    tScroll += direction * -1
+                elif width - 381 <= scrolled:
+                    nex += 0.1
+                cur += 0.1
+            elif width > 380:
+                tScroll += direction
+                scrolled = 0
+                cur = 0
+                nex = 0
+                direction *= -1
+            time.sleep(0.01)
+        self.titleContents.scroll(tScroll, 0)
 
     def updateDuration(self):
         if con.track['media']:
@@ -740,6 +764,9 @@ if __name__ == '__main__':
     # Main Window
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
+    font = QFont('Arial', 13)
+    app.setFont(font, 'QLabel')
+    app.setFont(font, 'QPushButton')
 
     MainWindow = QMainWindow()
     window = GUI(MainWindow)

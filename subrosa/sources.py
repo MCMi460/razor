@@ -23,11 +23,15 @@ class Source:
                     'key': 'FFmpegExtractAudio',
                     'preferredcodec': 'mp3',
                     'preferredquality': '192',
-                }],
+                }, {
+                    'format': 'jpg',
+                    'key': 'FFmpegThumbnailsConvertor',
+                    'when': 'before_dl'}],
                 'outtmpl': os.path.join(fd.directory, 'youtube/%(id)s.%(ext)s'),
                 'quiet': True,
                 'noplaylist': True,
                 'writethumbnail': True,
+                'no_continue': True,
             }
             if os.name == 'nt':
                 self.ydl_opts['ffmpeg_location'] = getPath('ffmpeg')
@@ -90,10 +94,6 @@ class Source:
                         response['title'] = info.get('title')
                         response['artist'] = info.get('uploader')
                         response['thumbnail'] = info.get('thumbnail')
-                    if not response['thumbnail'].endswith('jpg'):
-                        image = PIL.Image.open(os.path.join(fd.directory, 'youtube/%s.%s' % (response['id'], response['thumbnail'].split('.')[-1]))).convert('RGB')
-                        image.save(os.path.join(fd.directory, 'youtube/%s.jpg' % response['id']), 'jpeg')
-                        fd.deleteFile('youtube/%s.%s' % (response['id'], response['thumbnail'].split('.')[-1]))
                     self.IDS.append(response)
                     self.UPDATE_TITLE_LIST()
                     if sendUpdate:

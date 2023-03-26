@@ -5,7 +5,6 @@ pysdl2
 pysdl2-dll
 pyqt5
 pypresence
-Pillow
 requests
 chardet
 pyreadline3
