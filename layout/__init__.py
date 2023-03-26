@@ -164,6 +164,7 @@ class Ui_MainWindow(object):
         self.titleArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.titleArea.setWidgetResizable(True)
         self.titleArea.setObjectName("titleArea")
+        self.titleArea.setStyleSheet("border: 0px solid transparent;")
         self.titleContents = QtWidgets.QWidget()
         self.titleContents.setGeometry(QtCore.QRect(0, 0, 379, 23))
         self.titleContents.setStyleSheet("background-color: transparent;")

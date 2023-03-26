@@ -466,6 +466,9 @@
          <height>25</height>
         </rect>
        </property>
+       <property name="styleSheet">
+        <string notr="true">border: 0px solid transparent;</string>
+       </property>
        <property name="verticalScrollBarPolicy">
         <enum>Qt::ScrollBarAlwaysOff</enum>
        </property>

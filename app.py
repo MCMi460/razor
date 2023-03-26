@@ -764,7 +764,7 @@ if __name__ == '__main__':
     # Main Window
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
-    font = QFont('Arial', 13)
+    font = QFont('Arial', 10 if os.name == 'nt' else 13)
     app.setFont(font, 'QLabel')
     app.setFont(font, 'QPushButton')
 
