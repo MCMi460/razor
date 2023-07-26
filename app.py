@@ -184,8 +184,8 @@ class GUI(Ui_MainWindow):
         self.underLyingButton.clicked.emit()
 
     def _constantPlay(self, provider, id):
-        while id in self.downloading:
-            pass
+        #while id in self.downloading:
+        #    pass
         self.downloading.append(id)
         con.play(provider, id, False)
         self.downloading.remove(id)
@@ -293,7 +293,8 @@ class GUI(Ui_MainWindow):
             }
         else:
             info = self.provider.TRACK_INFO(con.track['id'])
-        self.titleLabel.setText(info['title'])
+        metric = self.titleLabel.fontMetrics()
+        self.titleLabel.setText(metric.elidedText(info['title'], Qt.ElideRight, 380))
         self.uploaderLabel.setText(info['artist'])
         if not id:
             if connected and self.provider.setupFinish: rpc.clear()
@@ -325,15 +326,7 @@ class GUI(Ui_MainWindow):
             if connected and self.provider.setupFinish: rpc.update(**dict)
 
     def updateProgressBar(self):
-        scrolled = 0
-        tScroll = 0
-        cur = 0
-        nex = 0
-        metric = QFontMetricsF(self.titleLabel.font())
-        width = metric.width(self.titleLabel.text())
         num = self.songSinceStartUp
-        direction = -1
-        self.titleLabel.adjustSize()
         while con.track['media'] and con.track['media'].get_state() in (Audio.State.Playing, Audio.State.Paused):
             if num != self.songSinceStartUp:
                 break
@@ -341,22 +334,7 @@ class GUI(Ui_MainWindow):
             if not self.sliding:
                 self.progressBar.setValue(currentDuration)
             self.currentTime.setText(self.convertToTimestamp(currentDuration))
-            if width > 380 and width - 380 + 50 > scrolled and nex <= 20:
-                if width - 380 > scrolled and cur >= 20:
-                    self.titleContents.scroll(direction, 0)
-                    scrolled += 1
-                    tScroll += direction * -1
-                elif width - 381 <= scrolled:
-                    nex += 0.1
-                cur += 0.1
-            elif width > 380:
-                tScroll += direction
-                scrolled = 0
-                cur = 0
-                nex = 0
-                direction *= -1
-            time.sleep(0.01)
-        self.titleContents.scroll(tScroll, 0)
+            time.sleep(0.1)
 
     def updateDuration(self):
         if con.track['media']:
