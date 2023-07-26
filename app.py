@@ -184,8 +184,8 @@ class GUI(Ui_MainWindow):
         self.underLyingButton.clicked.emit()
 
     def _constantPlay(self, provider, id):
-        while id in self.downloading:
-            pass
+        #while id in self.downloading:
+        #    pass
         self.downloading.append(id)
         con.play(provider, id, False)
         self.downloading.remove(id)
