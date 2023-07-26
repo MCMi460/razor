@@ -8,8 +8,7 @@
 
 Razor isn't what it sounds like – it's *better*. It downloads songs from YouTube and saves them offline in an easy-to-use application for personal listening!
 
-If you'd like to get started ASAP, see:
-  - [The quickstart guide](#quick)
+If you'd like to get started ASAP, see the quickstart guide right below!
 
 <h1 id = 'quick'>Quickstart Guide</h1>
 
