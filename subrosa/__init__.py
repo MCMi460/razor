@@ -5,7 +5,7 @@
 version = 1.02
 
 # Imports
-import os, sys, random, traceback, threading, time, json, math, webbrowser, inspect
+import os, sys, random, traceback, threading, time, json, math, webbrowser, inspect, urllib
 import yt_dlp
 try:
     os.environ['PYSDL2_DLL_PATH'] = sys._MEIPASS

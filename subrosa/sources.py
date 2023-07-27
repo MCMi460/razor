@@ -8,6 +8,17 @@ track_info = {
     'id': '',
 }
 
+playlist_info = {
+    'name': '',
+    'songs': [], # List of `track_info`s
+    'thumbnail': '', # Can be None. If None, then default playlist logo will appear.
+                     # Standardized to be a local file, preferably an absolute path.
+                     # Can be a URL if playlist is not saved.
+    'id': '', # Either a random number with a leading tilda (Razor playlist),
+              # or an ID for a Youtube playlist (cannot be a "Mix")
+    'description': '', # Either user-inputted or taken from Youtube
+}
+
 class Source:
     class Youtube():
         def __init__(self, *, sendUpdate = None) -> None:
@@ -32,6 +43,7 @@ class Source:
                 'noplaylist': True,
                 'writethumbnail': True,
                 'no_continue': True,
+                'ignoreerrors': True,
             }
             if os.name == 'nt':
                 self.ydl_opts['ffmpeg_location'] = getPath('ffmpeg')
@@ -151,6 +163,26 @@ class Source:
                     for ext in ('mp3', 'jpg'):
                         fd.deleteFile('youtube/%s.%s' % (song['id'], ext))
                     self.UPDATE_TITLE_LIST()
+
+        def GET_PLAYLIST(self, id:str) -> list:
+            with yt_dlp.YoutubeDL(dict(self.ydl_opts, **{
+                    'extract_flat': 'in_playlist',
+                }
+            )) as ydl:
+                response = ydl.extract_info(id, download = False)
+            playlist = playlist_info.copy()
+            playlist['id'] = response['id']
+            playlist['name'] = response.get('title')
+            playlist['description'] = response.get('description', '')
+            playlist['thumbnail'] = response.get('thumbnails', [{},])[-1].get('url', '')
+            for song in response['entries']:
+                track = track_info.copy()
+                track['id'] = song.get('id')
+                track['title'] = song.get('title')
+                track['artist'] = song.get('uploader')
+                track['thumbnail'] = song.get('thumbnails', [{},])[-1].get('url', '')
+                playlist['songs'].append(track)
+            return playlist
 
     def PLAY_TRACK(PROVIDER:object, id:str):
         return Audio.Player(PROVIDER.DOWNLOAD_TRACK(id))

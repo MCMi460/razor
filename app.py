@@ -645,10 +645,15 @@ class GUI(Ui_MainWindow):
         if not terms:
             self.searchResults = []
         else:
-            searchResults = self.provider.SEARCH(terms)
+            url = urllib.parse.urlparse(terms)
+            if url.scheme and url.netloc:
+                id = urllib.parse.parse_qs(url.query)['v'][0]
+                searchResults = [self.provider.TRACK_INFO(id),]
+            else:
+                searchResults = self.provider.SEARCH(terms)
             self.searchResults = []
             for result in searchResults:
-                if not 'Music' in result['categories'] and not terms.startswith('http'):
+                if not 'Music' in result.get('categories', []) and not terms.startswith('http'):
                     continue
                 result['id'] = result.get('id')
                 result['title'] = result.get('title')

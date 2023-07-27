@@ -217,3 +217,11 @@ class Console():
             + 'ID: %s') % (result['title'], result['uploader'], result['id'])
             )
         return self._log('\n---\n'.join(response[0:5]), Color.BLUE)
+
+    def playlist(self, provider:str, id:str):
+        """
+        Displays a playlist from an ID
+        """
+        provider = self._getProvider(provider)
+        playlist = provider.GET_PLAYLIST(id)
+        return self._log(playlist, Color.BLUE)
