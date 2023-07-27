@@ -524,9 +524,10 @@ class GUI(Ui_MainWindow):
                 else:
                     overPicture.contextMenuEvent = lambda event, id = songs[n]['id'] : self.onlineSongsDropdown(event, id)
                 title = QLabel(overPicture)
-                title.setFixedSize(181, 50)
+                title.setFixedSize(181, 65)
                 title.move(5,5)
                 title.setText(songs[n]['title'])
+                self.resizeFontHeight(title)
                 style = 'background-color:transparent; color: #FFF;'
                 title.setStyleSheet(style)
                 title.setWordWrap(True)
@@ -611,8 +612,8 @@ class GUI(Ui_MainWindow):
             self.next(self.addToQueue(id, 1), True)
         elif action == download:
             def download():
-                while id in self.downloading:
-                    pass
+                #while id in self.downloading:
+                #    pass
                 self.downloading.append(id)
                 self.provider.DOWNLOAD_TRACK(id)
                 self.downloading.remove(id)
@@ -683,6 +684,18 @@ class GUI(Ui_MainWindow):
         font = QFont('Arial', (10 if os.name == 'nt' else 13) + con.config['fontOffset'])
         app.setFont(font, 'QLabel')
         app.setFont(font, 'QPushButton')
+
+    def resizeFontWidth(self, label):
+        i = 30
+        width = label.width() + 1
+        while label.width() < width:
+            i -= 1
+            label.setFont(QFont('Arial', i))
+            width = label.fontMetrics().width(label.text())
+
+    def resizeFontHeight(self, label):
+        i = 30
+        height = label.fontMetrics().height() # This does not get height post-word-wrap
 
     def closeEvent(self, event):
         self.stop(True)
