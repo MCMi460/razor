@@ -150,6 +150,7 @@ class Source:
                     self.IDS.remove(song)
                     for ext in ('mp3', 'jpg'):
                         fd.deleteFile('youtube/%s.%s' % (song['id'], ext))
+                    self.UPDATE_TITLE_LIST()
 
     def PLAY_TRACK(PROVIDER:object, id:str):
         return Audio.Player(PROVIDER.DOWNLOAD_TRACK(id))

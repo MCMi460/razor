@@ -580,6 +580,9 @@ class GUI(Ui_MainWindow):
         elif action == play:
             self.next(self.addToQueue(id, 1), True)
         elif action == delete:
+            if len(self.queue) > 0:
+                if id == self.queue[0]:
+                    self.stop()
             self.provider.DELETE_TRACK(id)
             for i in range(self.queue.count(id)):
                 self.queue.remove(id)

@@ -1,3 +1,4 @@
+# MCMi460 on Github
 from . import *
 
 mix.Mix_Init(

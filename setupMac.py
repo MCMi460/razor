@@ -1,3 +1,4 @@
+# MCMi460 on Github
 from setuptools import setup
 
 APP = ['app.py']
