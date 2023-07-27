@@ -9,6 +9,8 @@ thumbs.db
 *.dll
 ffmpeg/
 VLC/
+dll/
+ffmpeg.zip
 
 # macOS
 .DS_Store
