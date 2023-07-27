@@ -725,7 +725,7 @@ class Credits(Ui_Credits):
 
         self.gitLink.mouseReleaseEvent = lambda e : self.openLink('https://github.com/MCMi460/razor')
 
-        self.mrgamedood.mouseReleaseEvent = lambda e : self.openLink('https://www.youtube.com/@mrgamecub3')
+        self.mrgamedood.mouseReleaseEvent = lambda e : self.openLink('https://github.com/mrgamecub3')
         self.deltaboi.mouseReleaseEvent = lambda e : self.openLink('https://github.com/MCMi460')
 
     def openLink(self, url:str):
