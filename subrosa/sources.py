@@ -57,8 +57,6 @@ class Source:
                 'no_continue': True,
                 'ignoreerrors': True,
             }
-            if os.name == 'nt':
-                self.ydl_opts['ffmpeg_location'] = getPath('ffmpeg')
             self.setupFinish = False
 
             fd.createDirectory('youtube')
@@ -129,7 +127,7 @@ class Source:
             opts = self.ydl_opts.copy()
             if hook:
                 opts['progress_hooks'] = [hook]
-            for i in range(5):
+            for i in range(2):
                 try:
                     with yt_dlp.YoutubeDL(opts) as ydl:
                         info = ydl.extract_info(url, download = True)
@@ -137,6 +135,7 @@ class Source:
                         response['title'] = info.get('title')
                         response['artist'] = info.get('uploader')
                         response['thumbnail'] = info.get('thumbnail')
+                    assert fd.isFile('youtube/%s.mp3' % id)
                     self.IDS.append(response)
                     self.UPDATE_TITLE_LIST()
                     if sendUpdate:

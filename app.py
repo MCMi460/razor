@@ -160,6 +160,8 @@ class GUI(Ui_MainWindow):
         self.updateFont()
 
         self.terms()
+        
+        self.installs()
 
     def miniplayer(self):
         window = MiniPlayer(self)
@@ -171,6 +173,15 @@ class GUI(Ui_MainWindow):
             window = Terms()
             window.dialog.setStyleSheet(self.theme['qss'])
             window.dialog.exec_()
+    
+    def installs(self):
+        if os.name == 'nt': # FFMPEG on Windows, for now
+            if not os.path.exists(con.config['ffmpeg']):
+                print('[No FFMPEG!]')
+                # Ensue installing FFMPEG via window
+                # For now, we do it automatically
+                from scripts.ffmpeg import installFFMPEG
+                installFFMPEG(con.config['ffmpeg'])
 
     def toggle(self):
         if con.track['media'] and con.track['media'].is_playing():

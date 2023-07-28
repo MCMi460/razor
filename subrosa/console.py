@@ -24,6 +24,7 @@ configTemplate = {
     'acceptedTerms;%s' % version: False,
     'volume': 64,
     'fontOffset': 0,
+    'ffmpeg': os.path.join(appPath, 'ffmpeg'),
 }
 
 class Console():
@@ -55,6 +56,9 @@ class Console():
                 if not key in self.config:
                     self.config[key] = configTemplate[key]
         self._updateConfig()
+        
+        if os.name == 'nt':
+            self.youtube.ydl_opts['ffmpeg_location'] = self.config['ffmpeg']
 
     def _main(self):
         self._log(*self.tip)

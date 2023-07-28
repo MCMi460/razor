@@ -1,6 +1,5 @@
 cd ..\
 python -m pip install -r requirements.txt pysdl2-dll pyinstaller
 python scripts\dll.py
-python scripts\ffmpeg.py
-python -m PyInstaller --onefile --clean --noconsole --add-data "layout;layout" --add-data "ffmpeg;ffmpeg" --add-data "dll\*.dll;." --icon=layout\resources\logo.ico --name=Razor app.py
+python -m PyInstaller --onefile --clean --noconsole --add-data "layout;layout" --add-data "dll\*.dll;." --icon=layout\resources\logo.ico --name=Razor app.py
 start dist
