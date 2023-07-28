@@ -9,7 +9,9 @@ track_info = {
 }
 
 playlist_info = {
-    'name': '',
+    'playlist': True,
+    'title': '',
+    'artist': '',
     'songs': [], # List of `track_info`s
     'thumbnail': '', # Can be None. If None, then default playlist logo will appear.
                      # Standardized to be a local file, preferably an absolute path.
@@ -28,16 +30,26 @@ class Source:
                 # Format:
                 # track_info
             ]
+            self.LISTS = [
+                # Default:
+                # NONE
+                # Format:
+                # playlist_info
+            ]
             self.ydl_opts = {
                 'format': 'bestaudio/best',
-                'postprocessors': [{
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'mp3',
-                    'preferredquality': '192',
-                }, {
-                    'format': 'jpg',
-                    'key': 'FFmpegThumbnailsConvertor',
-                    'when': 'before_dl'}],
+                'postprocessors': [
+                    {
+                        'key': 'FFmpegExtractAudio',
+                        'preferredcodec': 'mp3',
+                        'preferredquality': '192',
+                    },
+                    {
+                        'format': 'jpg',
+                        'key': 'FFmpegThumbnailsConvertor',
+                        'when': 'before_dl',
+                    }
+                ],
                 'outtmpl': os.path.join(fd.directory, 'youtube/%(id)s.%(ext)s'),
                 'quiet': True,
                 'noplaylist': True,
@@ -55,21 +67,40 @@ class Source:
                     self.IDS = [ json.loads(a) for a in fd.readFile('youtube/IDS.txt').split('\n') ]
                 except:
                     self.IDS = []
+            if fd.isFile('youtube/LISTS.txt'):
+                try:
+                    self.LISTS = [ json.loads(a) for a in fd.readFile('youtube/LISTS.txt').split('\n') ]
+                except:
+                    self.LISTS = []
             self.CHECK_TITLE_LIST(sendUpdate = sendUpdate)
 
         def UPDATE_TITLE_LIST(self) -> None:
             fd.createFile('youtube/IDS.txt', '\n'.join(( json.dumps(a) for a in self.IDS )))
+            fd.createFile('youtube/LISTS.txt', '\n'.join(( json.dumps(a) for a in self.LISTS )))
 
         def CHECK_TITLE_LIST(self, *, sendUpdate = None) -> None:
             IDS = self.IDS
             self.IDS = []
             reDownload = []
+            rePlaylists = []
+            for playlist in self.LISTS:
+                if not fd.isFile('youtube/%s.jpg' % playlist['id']):
+                    rePlaylists.append(playlist)
+                for song in playlist['songs']:
+                    if not song['id'] in [ song['id'] for song in IDS ]:
+                        IDS = [song] + IDS
             for song in IDS:
                 if not fd.isFile('youtube/%s.mp3' % song['id']):
                     reDownload.append(song)
                 else:
                     self.IDS.append(song)
             def start():
+                for playlist in rePlaylists:
+                    try:
+                        self.ADD_PLAYLIST(playlist['id'], update = False)
+                        sendUpdate()
+                    except:
+                        pass
                 for song in reDownload:
                     try:
                         self.DOWNLOAD_TRACK(song['id'], check_list = False, sendUpdate = sendUpdate)
@@ -79,7 +110,7 @@ class Source:
                         pass
                     time.sleep(1)
                 self.setupFinish = True
-            if len(reDownload) > 0:
+            if len(reDownload) > 0 or len(rePlaylists) > 0:
                 threading.Thread(target = start, daemon = True).start()
             else:
                 self.setupFinish = True
@@ -164,7 +195,8 @@ class Source:
                         fd.deleteFile('youtube/%s.%s' % (song['id'], ext))
                     self.UPDATE_TITLE_LIST()
 
-        def GET_PLAYLIST(self, id:str) -> list:
+        def ADD_PLAYLIST(self, id:str, *, sendUpdate = None, update = True) -> None:
+            assert isinstance(id, str)
             with yt_dlp.YoutubeDL(dict(self.ydl_opts, **{
                     'extract_flat': 'in_playlist',
                 }
@@ -172,17 +204,43 @@ class Source:
                 response = ydl.extract_info(id, download = False)
             playlist = playlist_info.copy()
             playlist['id'] = response['id']
-            playlist['name'] = response.get('title')
+            playlist['title'] = response.get('title')
+            playlist['artist'] = response.get('uploader_id')
             playlist['description'] = response.get('description', '')
             playlist['thumbnail'] = response.get('thumbnails', [{},])[-1].get('url', '')
             for song in response['entries']:
+                if song['title'] == '[Private video]':
+                    print('[SKIPPING PRIVATE VIDEO]')
+                    continue
                 track = track_info.copy()
                 track['id'] = song.get('id')
                 track['title'] = song.get('title')
                 track['artist'] = song.get('uploader')
                 track['thumbnail'] = song.get('thumbnails', [{},])[-1].get('url', '')
                 playlist['songs'].append(track)
-            return playlist
+            if update:
+                self.LISTS.append(playlist)
+                self.UPDATE_TITLE_LIST()
+                sendUpdate()
+                self.CHECK_TITLE_LIST(sendUpdate = sendUpdate)
+
+        def PLAYLIST_INFO(self, id:str) -> dict:
+            assert isinstance(id, str)
+            for a in self.LISTS:
+                if id == a['id']:
+                    return a
+            raise Exception('invalid/non-local playlist')
+
+        def LIST_PLAYLISTS_INFO(self) -> list:
+            return self.LISTS
+
+        def DELETE_PLAYLIST(self, id:str) -> None:
+            assert isinstance(id, str)
+            for playlist in self.LISTS:
+                if playlist['id'] == id:
+                    self.LISTS.remove(playlist)
+                    fd.deleteFile('youtube/%s.jpg' % playlist['id'])
+                    self.UPDATE_TITLE_LIST()
 
     def PLAY_TRACK(PROVIDER:object, id:str):
         return Audio.Player(PROVIDER.DOWNLOAD_TRACK(id))

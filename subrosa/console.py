@@ -223,5 +223,5 @@ class Console():
         Displays a playlist from an ID
         """
         provider = self._getProvider(provider)
-        playlist = provider.GET_PLAYLIST(id)
-        return self._log(playlist, Color.BLUE)
+        provider.ADD_PLAYLIST(id)
+        return self._log('Added playlist!', Color.GREEN)

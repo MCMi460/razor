@@ -341,6 +341,9 @@
       <string>File</string>
      </property>
      <addaction name="a_showSource"/>
+     <addaction name="separator"/>
+     <addaction name="a_newPlaylist"/>
+     <addaction name="a_playlistYoutube"/>
     </widget>
     <addaction name="menuRazor"/>
     <addaction name="menuFile"/>
@@ -534,6 +537,87 @@
      </widget>
     </widget>
    </widget>
+   <widget class="QScrollArea" name="playlistArea">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>80</y>
+      <width>841</width>
+      <height>521</height>
+     </rect>
+    </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="widgetResizable">
+     <bool>true</bool>
+    </property>
+    <widget class="QWidget" name="playlistContents">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>839</width>
+       <height>519</height>
+      </rect>
+     </property>
+     <widget class="QLabel" name="playlistTitle">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>10</y>
+        <width>561</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="playlistThumbnail">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>10</y>
+        <width>229</width>
+        <height>128</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="playlistDescription">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>80</y>
+        <width>561</width>
+        <height>58</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="playlistTitle_2">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>50</y>
+        <width>561</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </widget>
+   </widget>
    <zorder>sidePlayer</zorder>
    <zorder>musicArea</zorder>
    <zorder>queueArea</zorder>
@@ -542,10 +626,11 @@
    <zorder>searchSection</zorder>
    <zorder>menuBar</zorder>
    <zorder>themeButton</zorder>
+   <zorder>playlistArea</zorder>
   </widget>
   <action name="a_showSource">
    <property name="text">
-    <string>Show source directory</string>
+    <string>Show Source Directory</string>
    </property>
   </action>
   <action name="a_closeApp">
@@ -566,6 +651,16 @@
   <action name="a_credits">
    <property name="text">
     <string>Credits</string>
+   </property>
+  </action>
+  <action name="a_newPlaylist">
+   <property name="text">
+    <string>New Playlist</string>
+   </property>
+  </action>
+  <action name="a_playlistYoutube">
+   <property name="text">
+    <string>Playlist from Youtube</string>
    </property>
   </action>
  </widget>

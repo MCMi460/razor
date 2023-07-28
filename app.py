@@ -47,6 +47,14 @@ class GUI(Ui_MainWindow):
         self.MainWindow.closeEvent = self.closeEvent
 
     def setup(self):
+        # OS specifics #
+        if sys.platform.startswith('darwin'): # Mac
+            import AppKit
+            accent = AppKit.NSColor.controlAccentColor()
+            # This is not currently feasible
+        elif os.name == 'nt': # Windows
+            pass
+
         # Main Window
         self.MainWindow.setFixedSize(960, 600)
         self.MainWindow.setWindowIcon(QIcon(getPath('layout/resources/logo.ico')))
@@ -64,7 +72,8 @@ class GUI(Ui_MainWindow):
         # Music Area
         self.musicLayout = QGridLayout()
         self.musicContents.setLayout(self.musicLayout)
-        self.end = QLabel()
+        # Playlist Area
+        self.playlistArea.hide()
 
         # Menu Bar
         self.menuBar.move(0, 0)
@@ -75,6 +84,8 @@ class GUI(Ui_MainWindow):
         self.a_closeApp.triggered.connect(self.MainWindow.close)
         # File
         self.a_showSource.triggered.connect(lambda e : os.system('start %s' % appPath) if os.name == 'nt' else os.system('open %s' % appPath))
+        self.a_newPlaylist.triggered.connect(lambda e : print('New Playlist!'))
+        self.a_playlistYoutube.triggered.connect(lambda e : self.playlistYoutube())
         # Help
         self.a_issue.triggered.connect(lambda e : webbrowser.open('https://github.com/MCMi460/razor/issues/new'))
 
@@ -103,14 +114,14 @@ class GUI(Ui_MainWindow):
         }
         self.lightImages = icons.copy() | pixmaps.copy()
         self.darkImages = icons.copy() | pixmaps.copy()
-        for type in ('light', 'dark'):
+        for theme in ('light', 'dark'):
             # QSS Stylesheet (redundancy check?)
-            with open(getPath('layout/resources/%s/styles.qss' % type), 'r') as file:
-                getattr(self, type + 'Images')['qss'] = file.read()
+            with open(getPath('layout/resources/%s/styles.qss' % theme), 'r') as file:
+                getattr(self, theme + 'Images')['qss'] = file.read()
             for key in list(icons.keys()):
-                getattr(self, type + 'Images')[key] = QIcon(getPath(('layout/resources/%s/' % type) + icons[key]))
+                getattr(self, theme + 'Images')[key] = QIcon(getPath(('layout/resources/%s/' % theme) + icons[key]))
             for key in list(pixmaps.keys()):
-                getattr(self, type + 'Images')[key] = QPixmap(getPath(('layout/resources/%s/' % type) + pixmaps[key]))
+                getattr(self, theme + 'Images')[key] = QPixmap(getPath(('layout/resources/%s/' % theme) + pixmaps[key]))
 
         if con.config['darkMode']:
             self.theme = self.darkImages
@@ -166,10 +177,10 @@ class GUI(Ui_MainWindow):
             self.play()
 
     def play(self, id = None):
-        self.songSinceStartUp += 1
         if con.track['media'] and con.track['media'].get_state() == Audio.State.Paused:
             self.resume()
         elif con.track == track:
+            self.songSinceStartUp += 1
             con.track['provider'] = True
             if len(self.queue) == 0:
                 try:
@@ -283,6 +294,20 @@ class GUI(Ui_MainWindow):
             element.setEnabled(True)
         threading.Thread(target = wait, daemon = True).start()
 
+    def playlistYoutube(self):
+        link, ok = QInputDialog.getText(self.MainWindow, 'New Youtube Playlist', 'Enter the link of your Youtube playlist (must be public/unlisted):')
+        if not ok:
+            return
+        else:
+            try:
+                url = urllib.parse.urlparse(link)
+                if not url.netloc in ('www.youtube.com', 'youtube.com') or not url.path == '/playlist':
+                    raise Exception('That is an invalid Youtube playlist link.')
+                id = urllib.parse.parse_qs(url.query)['list'][0]
+                self.provider.ADD_PLAYLIST(id, sendUpdate = self.triggerMain.clicked.emit)
+            except Exception as e:
+                self.errorDialog(str(e))
+
     def updateMeta(self, id:str = None):
         if not id:
             info = {
@@ -324,6 +349,14 @@ class GUI(Ui_MainWindow):
             if connected and self.provider.setupFinish: rpc.clear()
         else:
             if connected and self.provider.setupFinish: rpc.update(**dict)
+
+    def loadPlaylistMeta(self, playlist):
+        playlist = self.provider.PLAYLIST_INFO(playlist)
+        # Put actual code
+        # here
+        self.playlistArea.show()
+        self.searchButton.setIcon(self.theme['homeImage'])
+        self.toggleQueue(None, True)
 
     def updateProgressBar(self):
         num = self.songSinceStartUp
@@ -488,11 +521,28 @@ class GUI(Ui_MainWindow):
     def fillMainWindow(self):
         if self.topMenu.currentIndex() == 0:
             songs = self.provider.LIST_TRACKS_INFO()
+            playlists = self.provider.LIST_PLAYLISTS_INFO()
             menu = False
         else:
             songs = self.searchResults
+            playlists = []
             menu = True
         self.emptyLayout(self.musicLayout)
+        y, rows = 0, 0
+        if len(playlists) > 0:
+            self.addEntry('Playlists', y, align = Qt.AlignLeft, header = True)
+            y, rows = self.addEntries(playlists, menu = menu)
+            self.addEntry('Songs', y, align = Qt.AlignLeft, header = True)
+        y_, rows_ = self.addEntries(songs, menu = menu)
+        y += y_
+        rows += rows_
+        if menu and rows == 0:
+            self.addEntry('Searching for music online may take some time. Please be patient.', y)
+        if rows <= 4:
+            self.musicLayout.addItem(QSpacerItem(0, 107 * (5 - rows) + 15 * (5 - rows) - 50))
+        self.addEntry('You\'ve reached the end!', y)
+
+    def addEntries(self, songs:list, *, menu = False):
         y = 16
         rows = math.ceil(len(songs) / 4)
         for row in range(rows):
@@ -518,9 +568,15 @@ class GUI(Ui_MainWindow):
                 overPicture.move(i * 191 + 15 * i, 0)
                 overPicture.setFixedSize(191, 107)
                 overPicture.setStyleSheet('')
-                overPicture.mouseReleaseEvent = lambda event, n = songs[n] : self.next(self.addToQueue(n['id'], 1), True) if event.button() == Qt.LeftButton else None
+                if songs[n].get('playlist'):
+                    overPicture.mouseReleaseEvent = lambda event, n = songs[n] : self.loadPlaylistMeta(n['id'])
+                else:
+                    overPicture.mouseReleaseEvent = lambda event, n = songs[n] : self.next(self.addToQueue(n['id'], 1), True) if event.button() == Qt.LeftButton else None
                 if not menu:
-                    overPicture.contextMenuEvent = lambda event, id = songs[n]['id'] : self.downloadedSongDropdown(event, id)
+                    if songs[n].get('playlist'):
+                        overPicture.contextMenuEvent = lambda event, id = songs[n]['id'] : self.playlistDropdown(event, id)
+                    else:
+                        overPicture.contextMenuEvent = lambda event, id = songs[n]['id'] : self.downloadedSongDropdown(event, id)
                 else:
                     overPicture.contextMenuEvent = lambda event, id = songs[n]['id'] : self.onlineSongsDropdown(event, id)
                 title = QLabel(overPicture)
@@ -554,21 +610,21 @@ class GUI(Ui_MainWindow):
                 overPicture.setCursor(QCursor(Qt.PointingHandCursor))
             self.musicLayout.addWidget(overlay)
             y += 122
+        return y, rows
+
+    def addEntry(self, text, y, *, align = Qt.AlignCenter, header = False):
         endg = QGroupBox()
         endg.setStyleSheet('background-color: transparent;')
         endg.move(0, y)
         endg.setFixedSize(809, 50)
-        self.end = QLabel(endg)
-        if rows > 4:
-            self.end.setText('You\'ve reached the end!')
-        elif menu and rows == 0:
-            self.end.setText('Searching for music online may take some time. Please be patient.')
-        self.end.resize(799, 40)
-        self.end.setWordWrap(True)
-        self.end.setAlignment(Qt.AlignCenter)
+        end = QLabel(endg)
+        end.setText(text)
+        end.resize(799, 50)
+        if header:
+            self.resizeFontWidth(end)
+        end.setWordWrap(True)
+        end.setAlignment(align)
         self.musicLayout.addWidget(endg)
-        if rows <= 4:
-            self.musicLayout.addItem(QSpacerItem(0, 107 * (4 - rows) + 15 * (4 - rows) - 50))
 
     def downloadedSongDropdown(self, event, id:str):
         contextMenu = QMenu(self.MainWindow)
@@ -620,17 +676,34 @@ class GUI(Ui_MainWindow):
                 self.triggerMain.clicked.emit()
             threading.Thread(target = download, daemon = True).start()
 
+    def playlistDropdown(self, event, id:str):
+        contextMenu = QMenu(self.MainWindow)
+        open = contextMenu.addAction('Open')
+        delete = contextMenu.addAction('Delete')
+        action = contextMenu.exec_(event.globalPos())
+        if action == open:
+            self.loadPlaylistMeta(id)
+        elif action == delete:
+            self.provider.DELETE_PLAYLIST(id)
+            self.fillMainWindow()
+
     def toggleSearch(self):
-        if self.topMenu.currentIndex() == 0:
-            self.searchButton.setIcon(self.theme['homeImage'])
-            self.topMenu.setCurrentIndex(1)
+        if self.playlistArea.isVisible():
+            self.playlistArea.hide()
+            self.searchButton.setIcon(self.theme['searchImage'])
             self.toggleQueue(None, True)
             self.fillMainWindow()
         else:
-            self.searchButton.setIcon(self.theme['searchImage'])
-            self.topMenu.setCurrentIndex(0)
-            self.toggleQueue(None, True)
-            self.fillMainWindow()
+            if self.topMenu.currentIndex() == 0:
+                self.searchButton.setIcon(self.theme['homeImage'])
+                self.topMenu.setCurrentIndex(1)
+                self.toggleQueue(None, True)
+                self.fillMainWindow()
+            else:
+                self.searchButton.setIcon(self.theme['searchImage'])
+                self.topMenu.setCurrentIndex(0)
+                self.toggleQueue(None, True)
+                self.fillMainWindow()
 
     def searchFinish(self):
         if not self.searching:
@@ -691,7 +764,7 @@ class GUI(Ui_MainWindow):
         app.setFont(font, 'QPushButton')
 
     def resizeFontWidth(self, label):
-        i = 30
+        i = 40
         width = label.width() + 1
         while label.width() < width:
             i -= 1
@@ -710,6 +783,13 @@ class GUI(Ui_MainWindow):
     def convertToTimestamp(self, milliseconds:int):
         min, sec = divmod(milliseconds / 1000, 60)
         return '%s:%s' % (int(min), str(int(sec)).zfill(2))
+
+    def errorDialog(self, text:str):
+        dialog = QMessageBox(
+            text = text,
+            parent = self.MainWindow,
+        )
+        dialog.exec_()
 
 class Credits(Ui_Credits):
     def __init__(self):
