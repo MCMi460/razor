@@ -15,6 +15,7 @@ temp/
 
 # macOS
 .DS_Store
+Assets.car
 
 # Razor
 sources/

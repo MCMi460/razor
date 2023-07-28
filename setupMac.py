@@ -2,7 +2,7 @@
 from setuptools import setup
 
 APP = ['app.py']
-DATA_FILES = []
+DATA_FILES = ['Assets.car']
 OPTIONS = {
     'includes': [
         'readline',

@@ -51,7 +51,10 @@ class GUI(Ui_MainWindow):
         if sys.platform.startswith('darwin'): # Mac
             import AppKit
             accent = AppKit.NSColor.controlAccentColor()
-            # This is not currently feasible
+            print('[Accent (Mac)] %s' % accent)
+            # app.py: accent == Catalog color: System controlAccentColor
+            # Razor.app: accent == ...
+            # Didn't work, going to sleep. Check tomorrow.
         elif os.name == 'nt': # Windows
             pass
 

@@ -2,7 +2,6 @@
 
 yt-dlp
 pysdl2
-pysdl2-dll
 pyqt5
 pypresence
 requests
