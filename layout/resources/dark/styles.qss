@@ -124,3 +124,7 @@ QLineEdit {
     color: #FFF;
     background-color: transparent;
 }
+
+QCheckBox {
+    background-color: transparent;
+}

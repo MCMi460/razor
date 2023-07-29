@@ -1,10 +1,11 @@
 # MCMi460 on Github
 from subrosa import *
-from layout import Ui_MainWindow
+from layout.mainwindow import Ui_MainWindow
 from layout.credits import Ui_Credits
 from layout.terms import Ui_Terms
 from layout.miniplayer import Ui_Mini
 from layout.settings import Ui_Settings
+from layout.install import Ui_Install
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -159,9 +160,10 @@ class GUI(Ui_MainWindow):
         self.fillMainWindow()
         self.updateFont()
 
+        pre = con.config['acceptedTerms;%s' % version]
         self.terms()
-        
-        self.installs()
+
+        self.installs(pre)
 
     def miniplayer(self):
         window = MiniPlayer(self)
@@ -173,15 +175,13 @@ class GUI(Ui_MainWindow):
             window = Terms()
             window.dialog.setStyleSheet(self.theme['qss'])
             window.dialog.exec_()
-    
-    def installs(self):
-        if os.name == 'nt': # FFMPEG on Windows, for now
-            if not os.path.exists(con.config['ffmpeg']):
-                print('[No FFMPEG!]')
-                # Ensue installing FFMPEG via window
-                # For now, we do it automatically
-                from scripts.ffmpeg import installFFMPEG
-                installFFMPEG(con.config['ffmpeg'])
+
+    def installs(self, pre):
+        if not pre:
+            window = Install()
+            window.dialog.setStyleSheet(self.theme['qss'])
+            window.firstLaunchSetup()
+            window.dialog.exec_()
 
     def toggle(self):
         if con.track['media'] and con.track['media'].is_playing():
@@ -847,6 +847,100 @@ class Terms(Ui_Terms):
     def closeEvent(self, event):
         event.accept()
         if not con.config['acceptedTerms;%s' % version]:
+            sys.exit()
+
+class Install(Ui_Install):
+    def __init__(self):
+        self.dialog = QDialog()
+        self.setupUi(self.dialog)
+
+        self.dialog.setFixedSize(600, 400)
+
+        self.dialog.closeEvent = self.closeEvent
+
+        self.done = False
+
+        # Remove:
+        #os.name = 'nt'
+
+        # Buttons
+        self.quit1.clicked.connect(lambda a : self.close())
+        if os.name == 'nt':
+            self.next1.clicked.connect(lambda a : self.ffmpegInstallSetup())
+            self.windowsBox.setEnabled(True)
+        elif sys.platform.startswith('darwin'):
+            self.next1.clicked.connect(lambda a : self.close(True))
+            self.next1.setText('Done')
+            self.macBox.setEnabled(True)
+        self.next2.clicked.connect(lambda a : self.installingSetup())
+        self.back2.clicked.connect(lambda a : self.firstLaunchSetup())
+        self.quit2.clicked.connect(lambda a : self.close())
+        self.next3.clicked.connect(lambda a : self.close(True))
+        self.quit3.clicked.connect(lambda a : self.close())
+
+        self.installText = ''
+        self.triggerHook = QPushButton()
+        self.triggerHook.clicked.connect(lambda a : self.installProgress.setPlainText(self.installText))
+
+    def firstLaunchSetup(self):
+        self.pages.setCurrentIndex(0)
+
+        # Labels
+        self.razorLogo.setPixmap(QPixmap(getPath('layout/resources/logo.png')))
+        self.phaseLabel.setText('Setup Menu')
+        GUI.resizeFontWidth(self, self.phaseLabel)
+
+    def ffmpegInstallSetup(self):
+        self.pages.setCurrentIndex(1)
+
+        # Labels
+        self.phaseLabel.setText('FFMPEG Install')
+        GUI.resizeFontWidth(self, self.phaseLabel)
+        self.linkEdit.setText('https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip')
+
+    def installingSetup(self):
+        self.pages.setCurrentIndex(2)
+        self.next3.setVisible(False)
+        self.quit3.setVisible(False)
+
+        if not os.path.exists(con.config['ffmpeg']):
+            self.hook('[No FFMPEG detected!]')
+            # Ensue installing FFMPEG via window
+            # For now, we do it automatically
+            from scripts.ffmpeg import installFFMPEG
+            threading.Thread(
+                target = installFFMPEG,
+                args = (
+                    con.config['ffmpeg'],
+                    os.path.abspath(appPath),
+                    self.linkEdit.text(),
+                ),
+                kwargs = {
+                    'hook': self.hook,
+                },
+                daemon = True,
+            ).start()
+        else:
+            self.hook('[FFMPEG found! Skipping install.]', True)
+
+    def hook(self, text, finished = False):
+        self.installText += text + '\n'
+        self.triggerHook.clicked.emit()
+        if finished:
+            if finished == 'Fail':
+                self.quit3.setVisible(True)
+            else:
+                self.next3.setVisible(True)
+
+    def close(self, done:bool = False):
+        self.done = done
+        self.dialog.close()
+
+    def closeEvent(self, event):
+        event.accept()
+        if not self.done:
+            con.config['acceptedTerms;%s' % version] = False
+            con._updateConfig()
             sys.exit()
 
 class MiniPlayer(Ui_Mini):
