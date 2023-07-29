@@ -815,6 +815,10 @@ class GUI(Ui_MainWindow):
 
     def closeEvent(self, event):
         self.stop(True)
+        try:
+            self.updatePresence()
+        except:
+            pass
         event.accept()
         sys.exit()
 
