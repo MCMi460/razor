@@ -231,6 +231,7 @@ class Ui_MainWindow(object):
         self.a_playlistYoutube = QtWidgets.QAction(MainWindow)
         self.a_playlistYoutube.setObjectName("a_playlistYoutube")
         self.menuRazor.addAction(self.a_settings)
+        self.menuRazor.addSeparator()
         self.menuRazor.addAction(self.a_credits)
         self.menuRazor.addAction(self.a_closeApp)
         self.menuHelp.addAction(self.a_issue)
