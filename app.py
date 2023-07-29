@@ -737,8 +737,11 @@ class GUI(Ui_MainWindow):
             self.searchResults = []
         else:
             url = urllib.parse.urlparse(terms)
-            if url.scheme and url.netloc:
+            if url.scheme and url.netloc in ('www.youtube.com', 'youtube.com'):
                 id = urllib.parse.parse_qs(url.query)['v'][0]
+                searchResults = [self.provider.TRACK_INFO(id),]
+            elif url.scheme and url.netloc in ('www.youtu.be', 'youtu.be'):
+                id = url.path.replace('/', '')
                 searchResults = [self.provider.TRACK_INFO(id),]
             else:
                 searchResults = self.provider.SEARCH(terms)
