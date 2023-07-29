@@ -263,10 +263,10 @@ class GUI(Ui_MainWindow):
 
     def addToQueue(self, id:str, pos:int = None):
         if not id:
-            tracks = self.provider.LIST_TRACKS()
+            tracks = self.provider.LIST_TRACKS(GUI = True)
             if len(tracks) == 0:
                 raise Exception('no songs!')
-            id = random.choice(self.provider.LIST_TRACKS())
+            id = random.choice(self.provider.LIST_TRACKS(GUI = True))
         if not pos:
             self.queue.append(id)
         else:
@@ -534,8 +534,8 @@ class GUI(Ui_MainWindow):
 
     def fillMainWindow(self):
         if self.topMenu.currentIndex() == 0:
-            songs = self.provider.LIST_TRACKS_INFO()
-            playlists = self.provider.LIST_PLAYLISTS_INFO()
+            songs = self.provider.LIST_TRACKS_INFO(GUI = True)
+            playlists = self.provider.LIST_PLAYLISTS_INFO(GUI = True)
             menu = False
         else:
             songs = self.searchResults
@@ -865,12 +865,10 @@ class Install(Ui_Install):
 
         # Buttons
         self.quit1.clicked.connect(lambda a : self.close())
+        self.next1.clicked.connect(lambda a : self.ffmpegInstallSetup())
         if os.name == 'nt':
-            self.next1.clicked.connect(lambda a : self.ffmpegInstallSetup())
             self.windowsBox.setEnabled(True)
         elif sys.platform.startswith('darwin'):
-            self.next1.clicked.connect(lambda a : self.close(True))
-            self.next1.setText('Done')
             self.macBox.setEnabled(True)
         self.next2.clicked.connect(lambda a : self.installingSetup())
         self.back2.clicked.connect(lambda a : self.firstLaunchSetup())
@@ -896,7 +894,12 @@ class Install(Ui_Install):
         # Labels
         self.phaseLabel.setText('FFMPEG Install')
         GUI.resizeFontWidth(self, self.phaseLabel)
-        self.linkEdit.setText('https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip')
+        if os.name == 'nt':
+            self.linkEdit2.setVisible(False)
+            self.linkEdit.setText('https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip')
+        else:
+            self.linkEdit.setText('https://evermeet.cx/ffmpeg/getrelease/ffprobe/zip')
+            self.linkEdit2.setText('https://evermeet.cx/ffmpeg/getrelease/zip')
 
     def installingSetup(self):
         self.pages.setCurrentIndex(2)
@@ -907,13 +910,13 @@ class Install(Ui_Install):
             self.hook('[No FFMPEG detected!]')
             # Ensue installing FFMPEG via window
             # For now, we do it automatically
-            from scripts.ffmpeg import installFFMPEG
+            from scripts.ffmpeg import installFFMPEG, installFFMPEGMac
             threading.Thread(
-                target = installFFMPEG,
+                target = installFFMPEG if os.name == 'nt' else installFFMPEGMac,
                 args = (
                     con.config['ffmpeg'],
                     os.path.abspath(appPath),
-                    self.linkEdit.text(),
+                    self.linkEdit.text() if os.name == 'nt' else [self.linkEdit.text(),self.linkEdit2.text()],
                 ),
                 kwargs = {
                     'hook': self.hook,

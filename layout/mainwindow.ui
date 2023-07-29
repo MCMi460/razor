@@ -650,7 +650,7 @@
   </action>
   <action name="a_credits">
    <property name="text">
-    <string>Credits</string>
+    <string>About</string>
    </property>
   </action>
   <action name="a_newPlaylist">

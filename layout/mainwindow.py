@@ -258,7 +258,7 @@ class Ui_MainWindow(object):
         self.a_closeApp.setText(_translate("MainWindow", "Exit"))
         self.a_issue.setText(_translate("MainWindow", "File an issue"))
         self.a_settings.setText(_translate("MainWindow", "Settings"))
-        self.a_credits.setText(_translate("MainWindow", "Credits"))
+        self.a_credits.setText(_translate("MainWindow", "About"))
         self.a_newPlaylist.setText(_translate("MainWindow", "New Playlist"))
         self.a_playlistYoutube.setText(_translate("MainWindow", "Playlist from Youtube"))
 

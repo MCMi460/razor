@@ -56,9 +56,8 @@ class Console():
                 if not key in self.config:
                     self.config[key] = configTemplate[key]
         self._updateConfig()
-        
-        if os.name == 'nt':
-            self.youtube.ydl_opts['ffmpeg_location'] = self.config['ffmpeg']
+
+        self.youtube.ydl_opts['ffmpeg_location'] = self.config['ffmpeg']
 
     def _main(self):
         self._log(*self.tip)

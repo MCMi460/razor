@@ -57,7 +57,7 @@ class Source:
                 'no_continue': True,
                 'ignoreerrors': True,
             }
-            self.setupFinish = False
+            self.setupFinish = True
 
             fd.createDirectory('youtube')
             if fd.isFile('youtube/IDS.txt'):
@@ -78,7 +78,6 @@ class Source:
 
         def CHECK_TITLE_LIST(self, *, sendUpdate = None) -> None:
             IDS = self.IDS
-            self.IDS = []
             reDownload = []
             rePlaylists = []
             for playlist in self.LISTS:
@@ -88,10 +87,8 @@ class Source:
                     if not song['id'] in [ song['id'] for song in IDS ]:
                         IDS = [song] + IDS
             for song in IDS:
-                if not fd.isFile('youtube/%s.mp3' % song['id']):
+                if not fd.isFile('youtube/%s.mp3' % song['id']) or not fd.isFile('youtube/%s.jpg' % song['id']):
                     reDownload.append(song)
-                else:
-                    self.IDS.append(song)
             def start():
                 for playlist in rePlaylists:
                     try:
@@ -109,7 +106,9 @@ class Source:
                     time.sleep(1)
                 self.setupFinish = True
             if len(reDownload) > 0 or len(rePlaylists) > 0:
-                threading.Thread(target = start, daemon = True).start()
+                if self.setupFinish:
+                    self.setupFinish = False
+                    threading.Thread(target = start, daemon = True).start()
             else:
                 self.setupFinish = True
             self.UPDATE_TITLE_LIST()
@@ -136,14 +135,14 @@ class Source:
                         response['artist'] = info.get('uploader')
                         response['thumbnail'] = info.get('thumbnail')
                     assert fd.isFile('youtube/%s.mp3' % id)
-                    self.IDS.append(response)
-                    self.UPDATE_TITLE_LIST()
+                    if not id in [ s['id'] for s in self.IDS ]:
+                        self.IDS.append(response)
+                        self.UPDATE_TITLE_LIST()
                     if sendUpdate:
                         sendUpdate()
                     return os.path.abspath(os.path.join(fd.directory, 'youtube/%s.mp3' % id))
                 except Exception as e:
-                    #print(traceback.format_exc().strip())
-                    pass
+                    raise e
             if not check_list:
                 for i in range(len(self.IDS)):
                     if self.IDS[i]['id'] == id:
@@ -153,11 +152,29 @@ class Source:
                 sendUpdate()
             raise Exception('failed to download track')
 
-        def LIST_TRACKS(self) -> list:
-            return list( a['id'] for a in self.IDS )
+        def LIST_TRACKS(self, GUI:bool = False) -> list:
+            IDS = self.IDS
+            if GUI:
+                IDS = []
+                for song in self.IDS:
+                    id = song['id']
+                    if not fd.isFile('youtube/%s.mp3' % id) or not fd.isFile('youtube/%s.jpg' % id):
+                        self.CHECK_TITLE_LIST()
+                    else:
+                        IDS.append(song)
+            return list( a['id'] for a in IDS )
 
-        def LIST_TRACKS_INFO(self) -> list:
-            return self.IDS
+        def LIST_TRACKS_INFO(self, GUI:bool = False) -> list:
+            IDS = self.IDS
+            if GUI:
+                IDS = []
+                for song in self.IDS:
+                    id = song['id']
+                    if not fd.isFile('youtube/%s.mp3' % id) or not fd.isFile('youtube/%s.jpg' % id):
+                        self.CHECK_TITLE_LIST()
+                    else:
+                        IDS.append(song)
+            return IDS
 
         def TRACK_INFO(self, id:str) -> dict:
             assert isinstance(id, str)
@@ -230,8 +247,17 @@ class Source:
                     return a
             raise Exception('invalid/non-local playlist')
 
-        def LIST_PLAYLISTS_INFO(self) -> list:
-            return self.LISTS
+        def LIST_PLAYLISTS_INFO(self, GUI:bool = False) -> list:
+            LISTS = self.LISTS
+            if GUI:
+                LISTS = []
+                for playlist in self.LISTS:
+                    id = playlist['id']
+                    if not fd.isFile('youtube/%s.jpg' % id):
+                        self.CHECK_TITLE_LIST()
+                    else:
+                        LISTS.append(playlist)
+            return LISTS
 
         def DELETE_PLAYLIST(self, id:str) -> None:
             assert isinstance(id, str)
