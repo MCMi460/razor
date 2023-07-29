@@ -327,6 +327,7 @@
       <string>Razor</string>
      </property>
      <addaction name="a_settings"/>
+     <addaction name="separator"/>
      <addaction name="a_credits"/>
      <addaction name="a_closeApp"/>
     </widget>
