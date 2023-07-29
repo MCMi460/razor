@@ -12,7 +12,7 @@ try:
 except:
     pass
 from sdl2 import sdlmixer as mix
-#import pypresence
+import pypresence
 import requests
 if os.name == 'nt':
     import pyreadline3

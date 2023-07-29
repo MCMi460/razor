@@ -57,9 +57,9 @@ class GUI(Ui_MainWindow):
             NSApp._setAccentColor_(red)
 
             accent = NSApp._accentColor()
-            print('[Accent (Mac)] %s' % accent)
+            print(fd.log('[Accent (Mac)] %s' % accent))
             if not accent == red:
-                print('[Accent change failed!]')
+                print(fd.log('[Accent change failed!]'))
         elif os.name == 'nt': # Windows
             pass
 
@@ -340,11 +340,10 @@ class GUI(Ui_MainWindow):
         self.titleLabel.setText(metric.elidedText(info['title'], Qt.ElideRight, 380))
         self.uploaderLabel.setText(info['artist'])
         if not id:
-            if connected and self.provider.setupFinish: rpc.clear()
             pix = self.theme['blankThumbnail']
         else:
-            self.updatePresence(info)
             pix = QPixmap(os.path.abspath(os.path.join(fd.directory, '%s/%s.jpg' % (self.providerName, id))))
+        self.updatePresence(info)
         self.thumbnailLabel.setPixmap(pix)
 
     def updatePresence(self, info:dict = {}):
@@ -363,10 +362,18 @@ class GUI(Ui_MainWindow):
                 dict['end'] = time.time() + (con.track['media'].get_length() - con.track['media'].get_time()) / 1000
         except:
             pass
-        if not self.cache['title']:
-            if connected and self.provider.setupFinish: rpc.clear()
-        else:
-            if connected and self.provider.setupFinish: rpc.update(**dict)
+        try:
+            if connected:
+                print(fd.log('[Discord request]'))
+                if not self.cache['title']:
+                    rpc.clear()
+                else:
+                    rpc.update(**dict)
+        except pypresence.exceptions.PipeClosed:
+            print(fd.log('[Discord pipe closed. Attempting reconnect]'))
+            connect()
+        except RuntimeError as e:
+            print(fd.log('[Discord event loop error ignored: %s]' % e))
 
     def loadPlaylistMeta(self, playlist):
         playlist = self.provider.PLAYLIST_INFO(playlist)
@@ -983,16 +990,30 @@ class Settings(Ui_Settings):
         # Runtime changes
         self.parent.updateFont()
 
+# Discord RPC
+def connect():
+    global connected, rpc
+    try:
+        rpc = pypresence.Presence('874365581162328115', pipe = 0) # Razor's Discord Application ID
+    except Exception as e:
+        print(fd.log('[Cannot initialize RPC: %s]' % e))
+        connected = False
+        return
+    try:
+        rpc.connect()
+        connected = True
+        print(fd.log('[Successful connection to Discord]'))
+        rpc.clear()
+    except Exception as e:
+        print(fd.log('[Failed connection to Discord]'))
+        print(fd.log('[Cannot connect RPC: %s]' % e))
+        connected = False
+
 if __name__ == '__main__':
     # Discord RPC
-    try:
-        raise Exception('not added yet') # Add Discord support another day
-        rpc = pypresence.Presence('874365581162328115')
-        rpc.connect()
-        rpc.clear()
-        connected = True
-    except:
-        connected = False
+    connected = False
+    rpc = None
+    connect()
 
     # Main Window
     app = QApplication(sys.argv)

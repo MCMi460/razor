@@ -34,6 +34,8 @@ class FileSystem():
         self.directory = os.path.join(appPath, directory)
         if not os.path.isdir(self.directory):
             os.makedirs(self.directory)
+        if not self.isFile('logs.txt'):
+            self.createFile('logs.txt', '')
 
     def isFile(self, route:str) -> None:
         assert isinstance(route, str)
@@ -82,3 +84,9 @@ class FileSystem():
         assert os.path.isfile(file)
 
         os.remove(file)
+
+    def log(self, text:str) -> str:
+        text = str(text)
+        assert self.isFile('logs.txt')
+        self.appendFile('logs.txt', str(time.time()) + ' ' + text + '\n')
+        return text
