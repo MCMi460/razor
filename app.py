@@ -17,9 +17,6 @@ class GUI(Ui_MainWindow):
     def __init__(self, MainWindow):
         global con
         self.MainWindow = MainWindow
-        
-        # PID
-        self.pid = os.getpid()
 
         # Triggers
         self.underLyingButton = QPushButton()
@@ -374,9 +371,9 @@ class GUI(Ui_MainWindow):
             try:
                 print(fd.log('[Discord request]'))
                 if not self.cache['title']:
-                    rpc.clear_activity(pid = self.pid)
+                    rpc.clear()
                 else:
-                    rpc.set_activity(pid = self.pid, **dict)
+                    rpc.update(**dict)
             except pypresence.exceptions.PipeClosed:
                 print(fd.log('[Discord pipe closed. Attempting reconnect]'))
                 connect()
@@ -824,6 +821,7 @@ class GUI(Ui_MainWindow):
         self.stop(True)
         try:
             self.updatePresence()
+            rpc.close()
         except:
             pass
         event.accept()
@@ -1015,16 +1013,16 @@ class Settings(Ui_Settings):
 def connect():
     global connected, rpc
     try:
-        rpc = pypresence.Client('874365581162328115', pipe = 0) # Razor's Discord Application ID
+        rpc = pypresence.Presence('874365581162328115', pipe = 0) # Razor's Discord Application ID
     except Exception as e:
         print(fd.log('[Cannot initialize RPC: %s]' % e))
         connected = False
         return
     try:
-        rpc.start()
+        rpc.connect()
         connected = True
         print(fd.log('[Successful connection to Discord]'))
-        rpc.clear_activity(pid = os.getpid())
+        rpc.clear()
     except Exception as e:
         print(fd.log('[Failed connection to Discord]'))
         print(fd.log('[Cannot connect RPC: %s]' % e))
