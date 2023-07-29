@@ -17,6 +17,9 @@ class GUI(Ui_MainWindow):
     def __init__(self, MainWindow):
         global con
         self.MainWindow = MainWindow
+        
+        # PID
+        self.pid = os.getpid()
 
         # Triggers
         self.underLyingButton = QPushButton()
@@ -371,9 +374,9 @@ class GUI(Ui_MainWindow):
             try:
                 print(fd.log('[Discord request]'))
                 if not self.cache['title']:
-                    rpc.clear()
+                    rpc.clear_activity(pid = self.pid)
                 else:
-                    rpc.update(**dict)
+                    rpc.set_activity(pid = self.pid, **dict)
             except pypresence.exceptions.PipeClosed:
                 print(fd.log('[Discord pipe closed. Attempting reconnect]'))
                 connect()
@@ -508,6 +511,8 @@ class GUI(Ui_MainWindow):
             if not con.track['media'] and not forceStart:
                 start = 0
             for i in range(start, len(self.queue)):
+                if i > 6:
+                    break
                 group = QGroupBox()
                 group.move(0, y)
                 group.setFixedSize(119, 71)
@@ -526,15 +531,15 @@ class GUI(Ui_MainWindow):
         endg = QGroupBox()
         endg.setStyleSheet('background-color: transparent;')
         endg.move(0, y)
-        endg.setFixedSize(119, 50)
+        endg.setFixedSize(119, 100)
         end = QLabel(endg)
-        end.setText('You\'ve reached the end!')
-        end.resize(109, 40)
+        end.setText('There\'s more here, but it\'s too big to show!' if len(self.queue) > 7 else 'You\'ve reached the end!')
+        end.resize(109, 90)
         end.setWordWrap(True)
         end.setAlignment(Qt.AlignCenter)
         self.queueLayout.addWidget(endg)
         # Spacer
-        self.queueLayout.addItem(QSpacerItem(0,471))
+        self.queueLayout.addItem(QSpacerItem(0, 471))
 
     def toggleQueue(self, event, hide = False):
         #self.miniplayer()
@@ -1010,16 +1015,16 @@ class Settings(Ui_Settings):
 def connect():
     global connected, rpc
     try:
-        rpc = pypresence.Presence('874365581162328115', pipe = 0) # Razor's Discord Application ID
+        rpc = pypresence.Client('874365581162328115', pipe = 0) # Razor's Discord Application ID
     except Exception as e:
         print(fd.log('[Cannot initialize RPC: %s]' % e))
         connected = False
         return
     try:
-        rpc.connect()
+        rpc.start()
         connected = True
         print(fd.log('[Successful connection to Discord]'))
-        rpc.clear()
+        rpc.clear_activity(pid = os.getpid())
     except Exception as e:
         print(fd.log('[Failed connection to Discord]'))
         print(fd.log('[Cannot connect RPC: %s]' % e))
