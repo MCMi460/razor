@@ -122,7 +122,7 @@ class GUI(Ui_MainWindow):
         }
         self.lightImages = icons.copy() | pixmaps.copy()
         self.darkImages = icons.copy() | pixmaps.copy()
-        for theme in ('light', 'dark'):
+        for theme in ('light',):
             # QSS Stylesheet (redundancy check?)
             with open(getPath('layout/resources/%s/styles.qss' % theme), 'r') as file:
                 getattr(self, theme + 'Images')['qss'] = file.read()
@@ -130,6 +130,16 @@ class GUI(Ui_MainWindow):
                 getattr(self, theme + 'Images')[key] = QIcon(getPath(('layout/resources/%s/' % theme) + icons[key]))
             for key in list(pixmaps.keys()):
                 getattr(self, theme + 'Images')[key] = QPixmap(getPath(('layout/resources/%s/' % theme) + pixmaps[key]))
+        
+        for theme in ('dark',):
+            # QSS Stylesheet (redundancy check?)
+            with open(os.path.join(appPath, 'theme_test/styles.qss'), 'r') as file:
+                getattr(self, theme + 'Images')['qss'] = file.read()
+                print(getattr(self, theme + 'Images')['qss'])
+            for key in list(icons.keys()):
+                getattr(self, theme + 'Images')[key] = QIcon(os.path.join(appPath, 'theme_test', icons[key]))
+            for key in list(pixmaps.keys()):
+                getattr(self, theme + 'Images')[key] = QPixmap(os.path.join(appPath, 'theme_test', pixmaps[key]))
 
         if con.config['darkMode']:
             self.theme = self.darkImages
