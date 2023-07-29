@@ -6,6 +6,7 @@ track_info = {
     'artist': '',
     'thumbnail': '',
     'id': '',
+    'playlist': False,
 }
 
 playlist_info = {

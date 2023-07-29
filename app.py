@@ -766,12 +766,14 @@ class GUI(Ui_MainWindow):
             for result in searchResults:
                 if not 'Music' in result.get('categories', []) and not terms.startswith('http'):
                     continue
-                result['id'] = result.get('id')
-                result['title'] = result.get('title')
-                result['artist'] = result.get('uploader')
-                result['thumbnail'] = result.get('thumbnail')
-                result['online'] = True
-                self.searchResults.append(result)
+                final = {}
+                final['id'] = result.get('id')
+                final['title'] = result.get('title')
+                final['artist'] = result.get('uploader')
+                final['thumbnail'] = result.get('thumbnail')
+                final['online'] = True
+                final['playlist'] = False
+                self.searchResults.append(final)
         self.triggerMain.clicked.emit()
         self.searchBar.setEnabled(True)
         self.loadingGif.hide()
