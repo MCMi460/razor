@@ -350,7 +350,7 @@ class GUI(Ui_MainWindow):
         for key in info.keys():
             self.cache[key] = info[key]
         dict = {
-            'state': self.cache['title'],
+            'details': self.cache['title'],
             'large_image': self.cache['thumbnail'],
             'large_text': self.cache['title'],
             'buttons': [{'label': 'YouTube', 'url':'https://youtube.com/watch?v=%s' % self.cache['id']}],
@@ -363,17 +363,27 @@ class GUI(Ui_MainWindow):
         except:
             pass
         try:
-            if connected:
+            if con.track['media'] and con.track['media'].is_paused():
+                dict['state'] = 'Paused'
+        except:
+            pass
+        def update():
+            try:
                 print(fd.log('[Discord request]'))
                 if not self.cache['title']:
                     rpc.clear()
                 else:
                     rpc.update(**dict)
-        except pypresence.exceptions.PipeClosed:
-            print(fd.log('[Discord pipe closed. Attempting reconnect]'))
-            connect()
-        except RuntimeError as e:
-            print(fd.log('[Discord event loop error ignored: %s]' % e))
+            except pypresence.exceptions.PipeClosed:
+                print(fd.log('[Discord pipe closed. Attempting reconnect]'))
+                connect()
+            except RuntimeError as e:
+                print(fd.log('[Discord event loop error ignored: %s]' % e))
+        if connected:
+            threading.Thread(
+                target = update,
+                daemon = True,
+            ).start()
 
     def loadPlaylistMeta(self, playlist):
         playlist = self.provider.PLAYLIST_INFO(playlist)
