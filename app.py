@@ -17,6 +17,9 @@ class GUI(Ui_MainWindow):
     def __init__(self, MainWindow):
         global con
         self.MainWindow = MainWindow
+        
+        # PID
+        self.pid = os.getpid()
 
         # Triggers
         self.underLyingButton = QPushButton()
@@ -353,9 +356,14 @@ class GUI(Ui_MainWindow):
             'details': self.cache['title'],
             'large_image': self.cache['thumbnail'],
             'large_text': self.cache['title'],
-            'buttons': [{'label': 'YouTube', 'url':'https://youtube.com/watch?v=%s' % self.cache['id']}],
+            #'buttons': [{'label': 'YouTube', 'url':'https://youtube.com/watch?v=%s' % self.cache['id']}],
             'small_image': 'logo',
             'small_text': 'Razor v%s' % version,
+            'join': self.cache['id'] + '56',
+            'spectate': self.cache['id'] + '12',
+            'match': self.cache['id'] + '34',
+            'party_size': [1, 2],
+            'party_id': '123lol',
         }
         try:
             if con.track['media'] and con.track['media'].is_playing():
@@ -371,9 +379,9 @@ class GUI(Ui_MainWindow):
             try:
                 print(fd.log('[Discord request]'))
                 if not self.cache['title']:
-                    rpc.clear()
+                    rpc.clear_activity(pid = self.pid)
                 else:
-                    rpc.update(**dict)
+                    rpc.set_activity(pid = self.pid, **dict)
             except pypresence.exceptions.PipeClosed:
                 print(fd.log('[Discord pipe closed. Attempting reconnect]'))
                 connect()
@@ -1013,20 +1021,33 @@ class Settings(Ui_Settings):
 def connect():
     global connected, rpc
     try:
-        rpc = pypresence.Presence('874365581162328115', pipe = 0) # Razor's Discord Application ID
+        rpc = pypresence.Client('874365581162328115', pipe = 0) # Razor's Discord Application ID
     except Exception as e:
         print(fd.log('[Cannot initialize RPC: %s]' % e))
         connected = False
         return
     try:
-        rpc.connect()
+        rpc.start()
         connected = True
         print(fd.log('[Successful connection to Discord]'))
-        rpc.clear()
+        rpc.clear_activity(pid = os.getpid())
     except Exception as e:
         print(fd.log('[Failed connection to Discord]'))
         print(fd.log('[Cannot connect RPC: %s]' % e))
         connected = False
+    
+    def join(ev):
+        print(ev)
+        print('YOOOOO')
+        #ie.open('') #py 3.6 breaks this
+    def join_request(ev):
+        print(ev)
+        print('YOOOOO')
+        #ie.open('') #py 3.6 breaks this
+    rpc.register_event("ACTIVITY_JOIN", join)
+    rpc.register_event("ACTIVITY_JOIN_REQUEST", join_request)
+    rpc.subscribe("ACTIVITY_JOIN")
+    rpc.subscribe("ACTIVITY_JOIN_REQUEST")
 
 if __name__ == '__main__':
     # Discord RPC
