@@ -12,13 +12,14 @@ from PyQt5.QtCore import *
 from notifypy import Notify
 
 con = None
+applicationID = '874365581162328115'
 
 # Create GUI
 class GUI(Ui_MainWindow):
     def __init__(self, MainWindow):
         global con
         self.MainWindow = MainWindow
-        
+
         # Discord
         self.pid = os.getpid()
         self.party_id = random.getrandbits(128)
@@ -65,8 +66,15 @@ class GUI(Ui_MainWindow):
             print(fd.log('[Accent (Mac)] %s' % accent))
             if not accent == red:
                 print(fd.log('[Accent change failed!]'))
+
+            delegate = NSApp.delegate()
+            #delegate.getUrl_withReplyEvent_(self.handleUrl, self.handleUrl)
+
         elif os.name == 'nt': # Windows
             pass
+
+        # URL Handler?
+        #QDesktopServices.setUrlHandler('razor', self.handleUrl)
 
         # Main Window
         self.MainWindow.setFixedSize(960, 600)
@@ -354,7 +362,7 @@ class GUI(Ui_MainWindow):
     def connect(self):
         global connected, rpc
         try:
-            rpc = pypresence.Client('874365581162328115', pipe = 0) # Razor's Discord Application ID
+            rpc = pypresence.Client(applicationID, pipe = 0) # Razor's Discord Application ID
         except Exception as e:
             print(fd.log('[Cannot initialize RPC: %s]' % e))
             connected = False
@@ -369,6 +377,13 @@ class GUI(Ui_MainWindow):
             print(fd.log('[Cannot connect RPC: %s]' % e))
             connected = False
 
+        if connected:
+            self.activityManager()
+
+    # URL Handlers
+    def handleUrl(self, url):
+        print(fd.log(url))
+
     def join(self, ev):
         #print(ev)
         secret = ev['secret'].split(' ')
@@ -376,7 +391,7 @@ class GUI(Ui_MainWindow):
         # This doesn't do anything for now.
         self.stop()
         self.play(secret[0])
-    
+
     def join_request(self, ev):
         #print(ev)
         notification = Notify()
@@ -387,9 +402,9 @@ class GUI(Ui_MainWindow):
             notification.icon = os.path.abspath(getPath('layout/resources/logo.ico'))
         # notification.icon = 'https://cdn.discordapp.com/avatars/%s/%s.png' % (ev['user']['id'], ev['user']['avatar']) # (or .gif)
         # See https://stackoverflow.com/a/50395421 for why it fails.
-        
+
         notification.send()
-    
+
     def events(self):
         rpc.register_event('ACTIVITY_JOIN', self.join)
         rpc.register_event('ACTIVITY_JOIN_REQUEST', self.join_request)
@@ -397,6 +412,15 @@ class GUI(Ui_MainWindow):
         rpc.subscribe('ACTIVITY_JOIN_REQUEST')
         #if 'join' in sys.argv:
             #rpc.read()
+        fd.log(str(sys.argv))
+
+    def activityManager(self):
+        import discordsdk
+        app = discordsdk.Discord(int(applicationID), discordsdk.CreateFlags.default)
+        activity_manager = app.get_activity_manager()
+        activity_manager.register_command('razor://discord')
+
+        print(fd.log('Registered game'))
 
     def updatePresence(self, info:dict = {}):
         for key in info.keys():
@@ -423,7 +447,7 @@ class GUI(Ui_MainWindow):
         except:
             pass
         try:
-            print(fd.log('[Discord request]'))
+            print('[Discord request]')
             if not self.cache['title']:
                 rpc.clear_activity(pid = self.pid)
             else:
@@ -1071,7 +1095,7 @@ if __name__ == '__main__':
 
     window.setupUi(MainWindow)
     window.setup()
-    
+
     # Discord RPC
     connected = False
     rpc = None

@@ -8,3 +8,4 @@ requests
 chardet
 pyreadline3
 notify-py
+git+https://github.com/LennyPhoenix/py-discord-sdk.git
