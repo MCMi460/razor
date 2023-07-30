@@ -371,12 +371,16 @@ class GUI(Ui_MainWindow):
     def join(self, ev):
         print(ev)
         secret = ev['secret'].split(' ')
-        self.party_id = secret[1]
+        # self.party_id = secret[1]
+        # This doesn't do anything for now.
         self.stop()
         self.play(secret[0])
     
     def join_request(self, ev):
         print(ev)
+        dialog = QMessageBox(text = '%s wants to listen to your song!' % ev['user']['global_name'])
+        dialog.setStyleSheet(self.theme['qss'])
+        dialog.exec_()
     
     def events(self):
         rpc.register_event('ACTIVITY_JOIN', self.join)
