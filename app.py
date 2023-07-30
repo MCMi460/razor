@@ -297,11 +297,9 @@ class GUI(Ui_MainWindow):
 
     def pause(self):
         con.pause()
-        self.updatePresence()
 
     def resume(self):
         con.resume()
-        self.updatePresence()
 
     def loop(self):
         self.looping = not self.looping
@@ -348,8 +346,45 @@ class GUI(Ui_MainWindow):
             pix = self.theme['blankThumbnail']
         else:
             pix = QPixmap(os.path.abspath(os.path.join(fd.directory, '%s/%s.jpg' % (self.providerName, id))))
-        self.updatePresence(info)
+        self.cache = info.copy()
         self.thumbnailLabel.setPixmap(pix)
+
+    # Discord RPC
+    def connect(self):
+        global connected, rpc
+        try:
+            rpc = pypresence.Client('874365581162328115', pipe = 0) # Razor's Discord Application ID
+        except Exception as e:
+            print(fd.log('[Cannot initialize RPC: %s]' % e))
+            connected = False
+            return
+        try:
+            rpc.start()
+            connected = True
+            print(fd.log('[Successful connection to Discord]'))
+            rpc.clear_activity(pid = os.getpid())
+        except Exception as e:
+            print(fd.log('[Failed connection to Discord]'))
+            print(fd.log('[Cannot connect RPC: %s]' % e))
+            connected = False
+
+    def join(self, ev):
+        print(ev)
+        secret = ev['secret'].split(' ')
+        self.party_id = secret[1]
+        self.stop()
+        self.play(secret[0])
+    
+    def join_request(self, ev):
+        print(ev)
+    
+    def events(self):
+        rpc.register_event('ACTIVITY_JOIN', self.join)
+        rpc.register_event('ACTIVITY_JOIN_REQUEST', self.join_request)
+        rpc.subscribe('ACTIVITY_JOIN')
+        rpc.subscribe('ACTIVITY_JOIN_REQUEST')
+        #if 'join' in sys.argv:
+            #rpc.read()
 
     def updatePresence(self, info:dict = {}):
         for key in info.keys():
@@ -375,33 +410,22 @@ class GUI(Ui_MainWindow):
                 dict['state'] = 'Paused'
         except:
             pass
-        def update():
-            try:
-                print(fd.log('[Discord request]'))
-                if not self.cache['title']:
-                    rpc.clear_activity(pid = self.pid)
-                else:
-                    rpc.set_activity(pid = self.pid, **dict)
-            except pypresence.exceptions.PipeClosed:
-                print(fd.log('[Discord pipe closed. Attempting reconnect]'))
-                connect()
-            except RuntimeError as e:
-                print(fd.log('[Discord event loop error ignored: %s]' % e))
-        if connected:
-            threading.Thread(
-                target = update,
-                daemon = True,
-            ).start()
+        try:
+            print(fd.log('[Discord request]'))
+            if not self.cache['title']:
+                rpc.clear_activity(pid = self.pid)
+            else:
+                rpc.set_activity(pid = self.pid, **dict)
+        except pypresence.exceptions.PipeClosed:
+            print(fd.log('[Discord pipe closed. Attempting reconnect]'))
+            connect()
+        except RuntimeError as e:
+            print(fd.log('[Discord event loop error ignored: %s]' % e))
 
-    def join(self, ev):
-        print(ev)
-        secret = ev['secret'].split(' ')
-        self.party_id = secret[1]
-        self.stop()
-        self.play(secret[0])
-    
-    def join_request(self, ev):
-        print(ev)
+    def _constantDiscord(self):
+        while connected:
+            self.updatePresence()
+            time.sleep(2)
 
     def loadPlaylistMeta(self, playlist):
         playlist = self.provider.PLAYLIST_INFO(playlist)
@@ -425,7 +449,6 @@ class GUI(Ui_MainWindow):
     def updateDuration(self):
         if con.track['media']:
             con.track['media'].set_time(self.progressBar.value())
-            self.updatePresence()
         else:
             self.stop()
         self.sliding = False
@@ -838,7 +861,6 @@ class GUI(Ui_MainWindow):
     def closeEvent(self, event):
         self.stop(True)
         try:
-            self.updatePresence()
             rpc.close()
         except:
             pass
@@ -1027,39 +1049,7 @@ class Settings(Ui_Settings):
         # Runtime changes
         self.parent.updateFont()
 
-# Discord RPC
-def connect():
-    global connected, rpc
-    try:
-        rpc = pypresence.Client('874365581162328115', pipe = 0) # Razor's Discord Application ID
-    except Exception as e:
-        print(fd.log('[Cannot initialize RPC: %s]' % e))
-        connected = False
-        return
-    try:
-        rpc.start()
-        connected = True
-        print(fd.log('[Successful connection to Discord]'))
-        rpc.clear_activity(pid = os.getpid())
-    except Exception as e:
-        print(fd.log('[Failed connection to Discord]'))
-        print(fd.log('[Cannot connect RPC: %s]' % e))
-        connected = False
-
-def events(self):
-    rpc.register_event("ACTIVITY_JOIN", self.join)
-    rpc.register_event("ACTIVITY_JOIN_REQUEST", self.join_request)
-    rpc.subscribe("ACTIVITY_JOIN")
-    rpc.subscribe("ACTIVITY_JOIN_REQUEST")
-    if "join" in sys.argv:
-        rpc.read()
-
 if __name__ == '__main__':
-    # Discord RPC
-    connected = False
-    rpc = None
-    connect()
-
     # Main Window
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
@@ -1069,9 +1059,18 @@ if __name__ == '__main__':
 
     window.setupUi(MainWindow)
     window.setup()
-
+    
+    # Discord RPC
+    connected = False
+    rpc = None
+    window.connect()
     if connected:
-        events(window)
+        window.events()
+        threading.Thread(
+            target = window._constantDiscord,
+            args = (),
+            daemon = True,
+        ).start()
 
     MainWindow.show()
 
