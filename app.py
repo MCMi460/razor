@@ -68,13 +68,15 @@ class GUI(Ui_MainWindow):
                 print(fd.log('[Accent change failed!]'))
 
             delegate = NSApp.delegate()
-            #delegate.getUrl_withReplyEvent_(self.handleUrl, self.handleUrl)
+            # delegate.getUrl_withReplyEvent_(self.handleUrl, self.handleUrl)
+            # Return to this at a later date...
 
         elif os.name == 'nt': # Windows
             pass
 
         # URL Handler?
         #QDesktopServices.setUrlHandler('razor', self.handleUrl)
+        self.setUrlHandler()
 
         # Main Window
         self.MainWindow.setFixedSize(960, 600)
@@ -415,12 +417,40 @@ class GUI(Ui_MainWindow):
         fd.log(str(sys.argv))
 
     def activityManager(self):
-        import discordsdk
+        try:
+            import discordsdk
+        except OSError as e:
+            print(fd.log(str(e)))
+            return
         app = discordsdk.Discord(int(applicationID), discordsdk.CreateFlags.default)
         activity_manager = app.get_activity_manager()
         activity_manager.register_command('razor://discord')
 
-        print(fd.log('Registered game'))
+        print(fd.log('[ActivityManager -- Registered game]'))
+
+    def setUrlHandler(self):
+        # Create URL Handler
+        if os.name == 'nt':
+            pass # Not implemented yet
+        elif sys.platform.startswith('darwin'):
+            import plistlib
+            URLHandler = {
+                'LSHandlerURLScheme': 'razor',
+                'LSHandlerRoleAll': 'org.pythonmac.unspecified.razor',
+                'LSHandlerPreferredVersions': {'LSHandlerRoleAll': '-'},
+            }
+
+            plistFile = os.path.expanduser('~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist')
+            with open(plistFile, 'rb') as plist:
+                handlers = plistlib.loads(plist.read())
+                for handler in handlers['LSHandlers']:
+                    if handler.get('LSHandlerURLScheme', '') == 'razor':
+                        print(fd.log('[Ignoring existing Razor URL handler]'))
+                        return
+                handlers['LSHandlers'].append(URLHandler)
+            with open(plistFile, 'wb') as plist:
+                print(fd.log('[Wrote PLIST URL Handler]'))
+                plist.write(plistlib.dumps(handlers))
 
     def updatePresence(self, info:dict = {}):
         for key in info.keys():
