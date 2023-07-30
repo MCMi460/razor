@@ -396,9 +396,9 @@ class GUI(Ui_MainWindow):
     def join(self, ev):
         print(ev)
         secret = ev['secret'].split(' ')
-        self.party_id = secret[0]
+        self.party_id = secret[1]
         self.stop()
-        self.play(secret[1])
+        self.play(secret[0])
     
     def join_request(self, ev):
         print(ev)
