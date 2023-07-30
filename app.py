@@ -18,8 +18,9 @@ class GUI(Ui_MainWindow):
         global con
         self.MainWindow = MainWindow
         
-        # PID
+        # Discord
         self.pid = os.getpid()
+        self.party_id = random.getrandbits(128)
 
         # Triggers
         self.underLyingButton = QPushButton()
@@ -225,6 +226,7 @@ class GUI(Ui_MainWindow):
         con.track['media'].set_volume(self.volumeSlider.value())
         while con.track['media'] and not con.track['media'].is_playing():
             pass
+        self.party_id = random.getrandbits(128)
         threading.Thread(target = self.updateMeta, args = (id,), daemon = True).start()
         self.progressBar.setValue(0)
         length = con.track['media'].get_length()
@@ -359,11 +361,9 @@ class GUI(Ui_MainWindow):
             #'buttons': [{'label': 'YouTube', 'url':'https://youtube.com/watch?v=%s' % self.cache['id']}],
             'small_image': 'logo',
             'small_text': 'Razor v%s' % version,
-            'join': self.cache['id'] + '56',
-            'spectate': self.cache['id'] + '12',
-            'match': self.cache['id'] + '34',
+            'join': self.cache['id'],
             'party_size': [1, 2],
-            'party_id': '123lol',
+            'party_id': str(self.party_id),
         }
         try:
             if con.track['media'] and con.track['media'].is_playing():
@@ -1035,7 +1035,8 @@ def connect():
         print(fd.log('[Failed connection to Discord]'))
         print(fd.log('[Cannot connect RPC: %s]' % e))
         connected = False
-    
+
+def events():
     def join(ev):
         print(ev)
         print('YOOOOO')
@@ -1048,12 +1049,16 @@ def connect():
     rpc.register_event("ACTIVITY_JOIN_REQUEST", join_request)
     rpc.subscribe("ACTIVITY_JOIN")
     rpc.subscribe("ACTIVITY_JOIN_REQUEST")
+    if "join" in sys.argv:
+        rpc.read()
 
 if __name__ == '__main__':
     # Discord RPC
     connected = False
     rpc = None
     connect()
+    if connected:
+        events()
 
     # Main Window
     app = QApplication(sys.argv)
