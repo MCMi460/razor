@@ -370,7 +370,7 @@ class GUI(Ui_MainWindow):
             connected = False
 
     def join(self, ev):
-        print(ev)
+        #print(ev)
         secret = ev['secret'].split(' ')
         # self.party_id = secret[1]
         # This doesn't do anything for now.
@@ -378,13 +378,15 @@ class GUI(Ui_MainWindow):
         self.play(secret[0])
     
     def join_request(self, ev):
-        print(ev)
-        notification = Notify(
-            default_application_name = 'Razor',
-        )
+        #print(ev)
+        notification = Notify()
+        notification.application_name = 'Razor'
         notification.title = '%s wants to listen to your song!' % ev['user']['global_name']
         notification.message = 'See Discord to accept!'
-        #notification.icon = 'https://cdn.discordapp.com/avatars/%s/%s.png' % (ev['user']['id'], ev['user']['avatar']) # (or .gif)
+        if os.name == 'nt':
+            notification.icon = os.path.abspath(getPath('layout/resources/logo.ico'))
+        # notification.icon = 'https://cdn.discordapp.com/avatars/%s/%s.png' % (ev['user']['id'], ev['user']['avatar']) # (or .gif)
+        # See https://stackoverflow.com/a/50395421 for why it fails.
         
         notification.send()
     

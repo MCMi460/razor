@@ -7,3 +7,4 @@ pypresence
 requests
 chardet
 pyreadline3
+notify-py
