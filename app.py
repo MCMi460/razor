@@ -9,6 +9,7 @@ from layout.install import Ui_Install
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from notifypy import Notify
 
 con = None
 
@@ -378,9 +379,12 @@ class GUI(Ui_MainWindow):
     
     def join_request(self, ev):
         print(ev)
-        dialog = QMessageBox(text = '%s wants to listen to your song!' % ev['user']['global_name'])
-        dialog.setStyleSheet(self.theme['qss'])
-        dialog.exec_()
+        notification = Notify()
+        notification.title = '%s wants to listen to your song!' % ev['user']['global_name']
+        notification.message = 'See Discord to accept!'
+        #notification.icon = 'https://cdn.discordapp.com/avatars/%s/%s.png' % (ev['user']['id'], ev['user']['avatar']) # (or .gif)
+        
+        notification.send()
     
     def events(self):
         rpc.register_event('ACTIVITY_JOIN', self.join)
