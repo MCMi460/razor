@@ -361,7 +361,7 @@ class GUI(Ui_MainWindow):
             #'buttons': [{'label': 'YouTube', 'url':'https://youtube.com/watch?v=%s' % self.cache['id']}],
             'small_image': 'logo',
             'small_text': 'Razor v%s' % version,
-            'join': self.cache['id'],
+            'join': self.cache['id'] + ' ' + str(self.party_id),
             'party_size': [1, 2],
             'party_id': str(self.party_id),
         }
@@ -392,6 +392,16 @@ class GUI(Ui_MainWindow):
                 target = update,
                 daemon = True,
             ).start()
+
+    def join(self, ev):
+        print(ev)
+        secret = ev['secret'].split(' ')
+        self.party_id = secret[0]
+        self.stop()
+        self.play(secret[1])
+    
+    def join_request(self, ev):
+        print(ev)
 
     def loadPlaylistMeta(self, playlist):
         playlist = self.provider.PLAYLIST_INFO(playlist)
@@ -1036,17 +1046,9 @@ def connect():
         print(fd.log('[Cannot connect RPC: %s]' % e))
         connected = False
 
-def events():
-    def join(ev):
-        print(ev)
-        print('YOOOOO')
-        #ie.open('') #py 3.6 breaks this
-    def join_request(ev):
-        print(ev)
-        print('YOOOOO')
-        #ie.open('') #py 3.6 breaks this
-    rpc.register_event("ACTIVITY_JOIN", join)
-    rpc.register_event("ACTIVITY_JOIN_REQUEST", join_request)
+def events(self):
+    rpc.register_event("ACTIVITY_JOIN", self.join)
+    rpc.register_event("ACTIVITY_JOIN_REQUEST", self.join_request)
     rpc.subscribe("ACTIVITY_JOIN")
     rpc.subscribe("ACTIVITY_JOIN_REQUEST")
     if "join" in sys.argv:
@@ -1057,8 +1059,6 @@ if __name__ == '__main__':
     connected = False
     rpc = None
     connect()
-    if connected:
-        events()
 
     # Main Window
     app = QApplication(sys.argv)
@@ -1069,6 +1069,9 @@ if __name__ == '__main__':
 
     window.setupUi(MainWindow)
     window.setup()
+
+    if connected:
+        events(window)
 
     MainWindow.show()
 
