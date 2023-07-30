@@ -379,7 +379,9 @@ class GUI(Ui_MainWindow):
     
     def join_request(self, ev):
         print(ev)
-        notification = Notify()
+        notification = Notify(
+            default_application_name = 'Razor',
+        )
         notification.title = '%s wants to listen to your song!' % ev['user']['global_name']
         notification.message = 'See Discord to accept!'
         #notification.icon = 'https://cdn.discordapp.com/avatars/%s/%s.png' % (ev['user']['id'], ev['user']['avatar']) # (or .gif)
