@@ -1025,6 +1025,9 @@ class Install(Ui_Install):
         self.next3.setVisible(False)
         self.quit3.setVisible(False)
 
+        # Labels
+        self.phaseLabel.setText('Installing...')
+
         threading.Thread(
             target = self.install,
             daemon = True,
@@ -1052,8 +1055,9 @@ class Install(Ui_Install):
         else:
             self.hook('[FFMPEG found! Skipping install.]')
         self.setUrlHandler()
-        
+
         self.hook('[Finished setup!]', True)
+        self.phaseLabel.setText('Done!')
 
     def setUrlHandler(self):
         # Create URL Handler
