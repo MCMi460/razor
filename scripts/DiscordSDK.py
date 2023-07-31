@@ -1,4 +1,4 @@
-import os, sys, shutil, requests, zipfile
+import os, sys, shutil, requests, zipfile, platform
 
 def useHook(text:str, hook, finished = False):
     print(text)
@@ -38,7 +38,12 @@ def installSDK(
 
         for root, x, files in os.walk(tempDir):
             for file in files:
-                if (file.endswith('.dll') and 'x86_64' in root) or (file.endswith('.dylib') and 'aarch64' in root):
+                if (file.endswith('.dll') and 'x86_64' in root and os.name == 'nt') or (
+                    sys.platform.startswith('darwin') and (
+                        (file.endswith('.dylib') and 'aarch64' in root and platform.machine() == 'arm64') or
+                        (file.endswith('.dylib') and 'x86_64' in root and platform.machine() == 'i386')
+                    )
+                ):
                     shutil.copyfile(os.path.join(root, file), os.path.join(path, file))
 
         useHook('[Cleaning up install files...]', hook)
