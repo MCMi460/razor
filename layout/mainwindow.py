@@ -230,11 +230,15 @@ class Ui_MainWindow(object):
         self.a_newPlaylist.setObjectName("a_newPlaylist")
         self.a_playlistYoutube = QtWidgets.QAction(MainWindow)
         self.a_playlistYoutube.setObjectName("a_playlistYoutube")
+        self.a_installMenu = QtWidgets.QAction(MainWindow)
+        self.a_installMenu.setObjectName("a_installMenu")
         self.menuRazor.addAction(self.a_settings)
         self.menuRazor.addSeparator()
         self.menuRazor.addAction(self.a_credits)
         self.menuRazor.addAction(self.a_closeApp)
         self.menuHelp.addAction(self.a_issue)
+        self.menuHelp.addSeparator()
+        self.menuHelp.addAction(self.a_installMenu)
         self.menuFile.addAction(self.a_showSource)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.a_newPlaylist)
@@ -262,6 +266,7 @@ class Ui_MainWindow(object):
         self.a_credits.setText(_translate("MainWindow", "About"))
         self.a_newPlaylist.setText(_translate("MainWindow", "New Playlist"))
         self.a_playlistYoutube.setText(_translate("MainWindow", "Playlist from Youtube"))
+        self.a_installMenu.setText(_translate("MainWindow", "Install Menu"))
 
 
 if __name__ == "__main__":

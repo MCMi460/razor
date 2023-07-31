@@ -26,6 +26,8 @@ config/
 build/
 dist/
 .eggs/
+lib/
+*.zip
 
 # Development
 test*.*

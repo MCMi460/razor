@@ -8,6 +8,17 @@ OPTIONS = {
         'readline',
     ],
     'iconfile': 'layout/resources/logo.icns',
+    'plist': {
+        'CFBundleURLTypes': [
+            {
+                'CFBundleTypeRole': 'Editor',
+                'CFBundleURLName': 'Razor Music URL',
+                'CFBundleURLSchemes': [
+                    'razor',
+                ],
+            },
+        ],
+    },
 }
 
 import os
@@ -23,6 +34,7 @@ def loopThrough(directory):
     DATA_FILES.append((directory, files))
 
 loopThrough('layout')
+loopThrough('lib')
 
 print('\n'.join(list(map(str, DATA_FILES))))
 

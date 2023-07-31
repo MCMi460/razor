@@ -9,14 +9,20 @@ from layout.install import Ui_Install
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from notifypy import Notify
 
 con = None
+applicationID = '874365581162328115'
 
 # Create GUI
 class GUI(Ui_MainWindow):
     def __init__(self, MainWindow):
         global con
         self.MainWindow = MainWindow
+
+        # Discord
+        self.pid = os.getpid()
+        self.party_id = random.getrandbits(64)
 
         # Triggers
         self.underLyingButton = QPushButton()
@@ -60,8 +66,17 @@ class GUI(Ui_MainWindow):
             print(fd.log('[Accent (Mac)] %s' % accent))
             if not accent == red:
                 print(fd.log('[Accent change failed!]'))
+
+            delegate = NSApp.delegate()
+            # delegate.getUrl_withReplyEvent_(self.handleUrl, self.handleUrl)
+            # Return to this at a later date...
+
         elif os.name == 'nt': # Windows
             pass
+
+        # URL Handler?
+        #QDesktopServices.setUrlHandler('razor', self.handleUrl)
+        #self.setUrlHandler()
 
         # Main Window
         self.MainWindow.setFixedSize(960, 600)
@@ -93,9 +108,10 @@ class GUI(Ui_MainWindow):
         # File
         self.a_showSource.triggered.connect(lambda e : os.system('start %s' % appPath) if os.name == 'nt' else os.system('open %s' % appPath))
         self.a_newPlaylist.triggered.connect(lambda e : print('New Playlist!'))
-        self.a_playlistYoutube.triggered.connect(lambda e : self.playlistYoutube())
+        self.a_playlistYoutube.triggered.connect(self.playlistYoutube)
         # Help
         self.a_issue.triggered.connect(lambda e : webbrowser.open('https://github.com/MCMi460/razor/issues/new'))
+        self.a_installMenu.triggered.connect(lambda e : self.installs(False, redo = True))
 
         # Volume
         self.volumeSlider.setValue(con.config['volume'])
@@ -180,9 +196,9 @@ class GUI(Ui_MainWindow):
             window.dialog.setStyleSheet(self.theme['qss'])
             window.dialog.exec_()
 
-    def installs(self, pre):
+    def installs(self, pre, redo = False):
         if not pre:
-            window = Install()
+            window = Install(redo = redo)
             window.dialog.setStyleSheet(self.theme['qss'])
             window.firstLaunchSetup()
             window.dialog.exec_()
@@ -222,6 +238,7 @@ class GUI(Ui_MainWindow):
         con.track['media'].set_volume(self.volumeSlider.value())
         while con.track['media'] and not con.track['media'].is_playing():
             pass
+        #self.party_id = random.getrandbits(128)
         threading.Thread(target = self.updateMeta, args = (id,), daemon = True).start()
         self.progressBar.setValue(0)
         length = con.track['media'].get_length()
@@ -292,11 +309,9 @@ class GUI(Ui_MainWindow):
 
     def pause(self):
         con.pause()
-        self.updatePresence()
 
     def resume(self):
         con.resume()
-        self.updatePresence()
 
     def loop(self):
         self.looping = not self.looping
@@ -343,8 +358,78 @@ class GUI(Ui_MainWindow):
             pix = self.theme['blankThumbnail']
         else:
             pix = QPixmap(os.path.abspath(os.path.join(fd.directory, '%s/%s.jpg' % (self.providerName, id))))
-        self.updatePresence(info)
+        self.cache = info.copy()
         self.thumbnailLabel.setPixmap(pix)
+
+    # Discord RPC
+    def connect(self):
+        global connected, rpc
+        try:
+            rpc = pypresence.Client(applicationID, pipe = 0) # Razor's Discord Application ID
+        except Exception as e:
+            print(fd.log('[Cannot initialize RPC: %s]' % e))
+            connected = False
+            return
+        try:
+            rpc.start()
+            connected = True
+            print(fd.log('[Successful connection to Discord]'))
+            rpc.clear_activity(pid = os.getpid())
+        except Exception as e:
+            print(fd.log('[Failed connection to Discord]'))
+            print(fd.log('[Cannot connect RPC: %s]' % e))
+            connected = False
+
+        if connected:
+            self.activityManager()
+
+    # URL Handlers
+    def handleUrl(self, url):
+        print(fd.log(url))
+
+    def join(self, ev):
+        #print(ev)
+        secret = ev['secret'].split(' ')
+        #self.party_id = secret[1]
+        # This doesn't do anything for now.
+        self.stop()
+        self.play(secret[0])
+
+    def join_request(self, ev):
+        #print(ev)
+        notification = Notify()
+        notification.application_name = 'Razor'
+        notification.title = '%s wants to listen to your song!' % ev['user']['global_name']
+        notification.message = 'See Discord to accept!'
+        if os.name == 'nt':
+            notification.icon = os.path.abspath(getPath('layout/resources/logo.ico'))
+        # notification.icon = 'https://cdn.discordapp.com/avatars/%s/%s.png' % (ev['user']['id'], ev['user']['avatar']) # (or .gif)
+        # See https://stackoverflow.com/a/50395421 for why it fails.
+
+        notification.send()
+
+    def events(self):
+        rpc.register_event('ACTIVITY_JOIN', self.join)
+        rpc.register_event('ACTIVITY_JOIN_REQUEST', self.join_request)
+        rpc.subscribe('ACTIVITY_JOIN')
+        rpc.subscribe('ACTIVITY_JOIN_REQUEST')
+        #try:
+        #    rpc.read()
+        #except pypresence.exceptions.ResponseTimeout:
+        #    pass
+        fd.log(str(sys.argv))
+
+    def activityManager(self):
+        try:
+            import discordsdk
+        except OSError as e:
+            print(fd.log(str(e)))
+            return
+        app = discordsdk.Discord(int(applicationID), discordsdk.CreateFlags.default)
+        activity_manager = app.get_activity_manager()
+        activity_manager.register_command('razor://discord')
+
+        print(fd.log('[ActivityManager -- Registered game]'))
 
     def updatePresence(self, info:dict = {}):
         for key in info.keys():
@@ -353,9 +438,12 @@ class GUI(Ui_MainWindow):
             'details': self.cache['title'],
             'large_image': self.cache['thumbnail'],
             'large_text': self.cache['title'],
-            'buttons': [{'label': 'YouTube', 'url':'https://youtube.com/watch?v=%s' % self.cache['id']}],
+            #'buttons': [{'label': 'YouTube', 'url':'https://youtube.com/watch?v=%s' % self.cache['id']}],
             'small_image': 'logo',
             'small_text': 'Razor v%s' % version,
+            'join': self.cache['id'],
+            'party_size': [1, 2],
+            'party_id': self.cache['id'] + '/' + str(self.party_id),
         }
         try:
             if con.track['media'] and con.track['media'].is_playing():
@@ -367,23 +455,22 @@ class GUI(Ui_MainWindow):
                 dict['state'] = 'Paused'
         except:
             pass
-        def update():
-            try:
-                print(fd.log('[Discord request]'))
-                if not self.cache['title']:
-                    rpc.clear()
-                else:
-                    rpc.update(**dict)
-            except pypresence.exceptions.PipeClosed:
-                print(fd.log('[Discord pipe closed. Attempting reconnect]'))
-                connect()
-            except RuntimeError as e:
-                print(fd.log('[Discord event loop error ignored: %s]' % e))
-        if connected:
-            threading.Thread(
-                target = update,
-                daemon = True,
-            ).start()
+        try:
+            print('[Discord request]')
+            if not self.cache['title']:
+                rpc.clear_activity(pid = self.pid)
+            else:
+                rpc.set_activity(pid = self.pid, **dict)
+        except pypresence.exceptions.PipeClosed:
+            print(fd.log('[Discord pipe closed. Attempting reconnect]'))
+            connect()
+        except RuntimeError as e:
+            print(fd.log('[Discord event loop error ignored: %s]' % e))
+
+    def _constantDiscord(self):
+        while connected:
+            self.updatePresence()
+            time.sleep(2)
 
     def loadPlaylistMeta(self, playlist):
         playlist = self.provider.PLAYLIST_INFO(playlist)
@@ -407,7 +494,6 @@ class GUI(Ui_MainWindow):
     def updateDuration(self):
         if con.track['media']:
             con.track['media'].set_time(self.progressBar.value())
-            self.updatePresence()
         else:
             self.stop()
         self.sliding = False
@@ -820,7 +906,6 @@ class GUI(Ui_MainWindow):
     def closeEvent(self, event):
         self.stop(True)
         try:
-            self.updatePresence()
             rpc.close()
         except:
             pass
@@ -883,7 +968,7 @@ class Terms(Ui_Terms):
             sys.exit()
 
 class Install(Ui_Install):
-    def __init__(self):
+    def __init__(self, redo = False):
         self.dialog = QDialog()
         self.setupUi(self.dialog)
 
@@ -892,6 +977,7 @@ class Install(Ui_Install):
         self.dialog.closeEvent = self.closeEvent
 
         self.done = False
+        self.redo = redo
 
         # Remove:
         #os.name = 'nt'
@@ -939,25 +1025,58 @@ class Install(Ui_Install):
         self.next3.setVisible(False)
         self.quit3.setVisible(False)
 
+        # Labels
+        self.phaseLabel.setText('Installing...')
+
+        threading.Thread(
+            target = self.install,
+            daemon = True,
+        ).start()
+
+    def install(self):
         if not os.path.exists(con.config['ffmpeg']):
             self.hook('[No FFMPEG detected!]')
-            # Ensue installing FFMPEG via window
-            # For now, we do it automatically
+            # Install FFMPEG
             from scripts.ffmpeg import installFFMPEG, installFFMPEGMac
-            threading.Thread(
-                target = installFFMPEG if os.name == 'nt' else installFFMPEGMac,
-                args = (
+            if os.name == 'nt':
+                installFFMPEG(
                     con.config['ffmpeg'],
                     os.path.abspath(appPath),
-                    self.linkEdit.text() if os.name == 'nt' else [self.linkEdit.text(),self.linkEdit2.text()],
-                ),
-                kwargs = {
-                    'hook': self.hook,
-                },
-                daemon = True,
-            ).start()
+                    self.linkEdit.text(),
+                    hook = self.hook,
+                )
+            elif sys.platform.startswith('darwin'):
+                installFFMPEGMac(
+                    con.config['ffmpeg'],
+                    os.path.abspath(appPath),
+                    [self.linkEdit.text(), self.linkEdit2.text()],
+                    hook = self.hook,
+                )
         else:
-            self.hook('[FFMPEG found! Skipping install.]', True)
+            self.hook('[FFMPEG found! Skipping install.]')
+        self.setUrlHandler()
+
+        self.hook('[Finished setup!]', True)
+        self.phaseLabel.setText('Done!')
+
+    def setUrlHandler(self):
+        # Create URL Handler
+        if self.registerProtocol.isChecked():
+            if os.name == 'nt':
+                from scripts.urlRegister import write
+                loc = os.path.abspath(os.path.join(appPath, 'urlRegister.reg'))
+                if getattr(sys, 'frozen', False):
+                    path = os.path.abspath(sys.executable)
+                elif __file__:
+                    path = getPath(__file__)
+                write(path.replace('\\', '\\\\'), loc)
+                self.hook('[Requesting permissions to write URL to Registry]')
+                os.system(loc)
+                self.hook('\n[NOTE]: razor:// points to %s -- run the Install Menu again if you\'d like to update this.\n(This may have failed. Please file an issue if it is not working for you.)\n' % path)
+            elif sys.platform.startswith('darwin'):
+                self.hook('[Mac .app has URL protocol defined in Info.plist]')
+                pass # Done in Info.plist
+            self.hook('[Created URL Handler]')
 
     def hook(self, text, finished = False):
         self.installText += text + '\n'
@@ -974,7 +1093,7 @@ class Install(Ui_Install):
 
     def closeEvent(self, event):
         event.accept()
-        if not self.done:
+        if not self.done and not self.redo:
             con.config['acceptedTerms;%s' % version] = False
             con._updateConfig()
             sys.exit()
@@ -1009,31 +1128,7 @@ class Settings(Ui_Settings):
         # Runtime changes
         self.parent.updateFont()
 
-# Discord RPC
-def connect():
-    global connected, rpc
-    try:
-        rpc = pypresence.Presence('874365581162328115', pipe = 0) # Razor's Discord Application ID
-    except Exception as e:
-        print(fd.log('[Cannot initialize RPC: %s]' % e))
-        connected = False
-        return
-    try:
-        rpc.connect()
-        connected = True
-        print(fd.log('[Successful connection to Discord]'))
-        rpc.clear()
-    except Exception as e:
-        print(fd.log('[Failed connection to Discord]'))
-        print(fd.log('[Cannot connect RPC: %s]' % e))
-        connected = False
-
 if __name__ == '__main__':
-    # Discord RPC
-    connected = False
-    rpc = None
-    connect()
-
     # Main Window
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
@@ -1043,6 +1138,18 @@ if __name__ == '__main__':
 
     window.setupUi(MainWindow)
     window.setup()
+
+    # Discord RPC
+    connected = False
+    rpc = None
+    window.connect()
+    if connected:
+        window.events()
+        threading.Thread(
+            target = window._constantDiscord,
+            args = (),
+            daemon = True,
+        ).start()
 
     MainWindow.show()
 
