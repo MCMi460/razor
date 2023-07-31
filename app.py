@@ -426,7 +426,7 @@ class GUI(Ui_MainWindow):
             return
         app = discordsdk.Discord(int(applicationID), discordsdk.CreateFlags.default)
         activity_manager = app.get_activity_manager()
-        activity_manager.register_command('razor://testing123')
+        activity_manager.register_command('razor://discord')
         print(getPath(__file__))
 
         print(fd.log('[ActivityManager -- Registered game]'))
