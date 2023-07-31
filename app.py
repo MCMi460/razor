@@ -389,7 +389,7 @@ class GUI(Ui_MainWindow):
     def join(self, ev):
         #print(ev)
         secret = ev['secret'].split(' ')
-        self.party_id = secret[1]
+        #self.party_id = secret[1]
         # This doesn't do anything for now.
         self.stop()
         self.play(secret[0])
@@ -440,9 +440,9 @@ class GUI(Ui_MainWindow):
             #'buttons': [{'label': 'YouTube', 'url':'https://youtube.com/watch?v=%s' % self.cache['id']}],
             'small_image': 'logo',
             'small_text': 'Razor v%s' % version,
-            'join': self.cache['id'] + ' ' + str(self.party_id),
+            'join': self.cache['id'],
             'party_size': [1, 2],
-            'party_id': str(self.party_id),
+            'party_id': self.cache['id'] + '/' + str(self.party_id),
         }
         try:
             if con.track['media'] and con.track['media'].is_playing():
