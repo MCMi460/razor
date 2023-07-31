@@ -412,8 +412,10 @@ class GUI(Ui_MainWindow):
         rpc.register_event('ACTIVITY_JOIN_REQUEST', self.join_request)
         rpc.subscribe('ACTIVITY_JOIN')
         rpc.subscribe('ACTIVITY_JOIN_REQUEST')
-        #if 'join' in sys.argv:
-            #rpc.read()
+        #try:
+        #    rpc.read()
+        #except pypresence.exceptions.ResponseTimeout:
+        #    pass
         fd.log(str(sys.argv))
 
     def activityManager(self):
