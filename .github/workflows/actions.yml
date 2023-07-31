@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['windows-latest']
+        os: ['windows-latest', 'macos-latest']
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v3
@@ -29,3 +29,18 @@ jobs:
       uses: softprops/action-gh-release@v0.1.15
       with:
         files: dist/Razor.exe
+    
+    # MacOS Build
+    - name: 'Build'
+      if: matrix.os == 'macos-latest'
+      run: |
+        cd scripts &&
+        ./build.sh &&
+        cd ../dist &&
+        zip -yr mac.zip Razor.app/
+
+    - name: 'Upload Build'
+      if: matrix.os == 'macos-latest'
+      uses: softprops/action-gh-release@v0.1.15
+      with:
+        files: dist/mac.zip
