@@ -1065,14 +1065,18 @@ class Install(Ui_Install):
             if os.name == 'nt':
                 from scripts.urlRegister import write
                 loc = os.path.abspath(os.path.join(appPath, 'urlRegister.reg'))
-                write(getPath(__file__), loc)
+                if getattr(sys, 'frozen', False):
+                    path = os.path.abspath(sys.executable)
+                elif __file__:
+                    path = getPath(__file__)
+                write(path.replace('\\', '\\\\'), loc)
                 self.hook('[Requesting permissions to write URL to Registry]')
                 os.system(loc)
+                self.hook('\n[NOTE]: razor:// points to %s -- run the Install Menu again if you\'d like to update this.\n(This may have failed. Please file an issue if it is not working for you.)\n' % path)
             elif sys.platform.startswith('darwin'):
                 self.hook('[Mac .app has URL protocol defined in Info.plist]')
                 pass # Done in Info.plist
             self.hook('[Created URL Handler]')
-            self.hook('[NOTE]: (This may have failed. Please file an issue if it is not working for you.)')
 
     def hook(self, text, finished = False):
         self.installText += text + '\n'

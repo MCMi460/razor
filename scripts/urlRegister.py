@@ -1,4 +1,4 @@
-reg = """Windows Registry Editor Version 5.00
+reg = r"""Windows Registry Editor Version 5.00
 
 [-HKEY_CLASSES_ROOT\razor]
 
@@ -14,7 +14,6 @@ reg = """Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\razor\shell\open\command]
 @="PLACEHOLDER %1"
 """
-import os
 
 def write(exe, loc):
     with open(loc, 'w+') as file:
