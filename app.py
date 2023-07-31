@@ -111,7 +111,7 @@ class GUI(Ui_MainWindow):
         self.a_playlistYoutube.triggered.connect(self.playlistYoutube)
         # Help
         self.a_issue.triggered.connect(lambda e : webbrowser.open('https://github.com/MCMi460/razor/issues/new'))
-        self.a_installMenu.triggered.connect(lambda e : self.installs(False))
+        self.a_installMenu.triggered.connect(lambda e : self.installs(False, redo = True))
 
         # Volume
         self.volumeSlider.setValue(con.config['volume'])
@@ -196,9 +196,9 @@ class GUI(Ui_MainWindow):
             window.dialog.setStyleSheet(self.theme['qss'])
             window.dialog.exec_()
 
-    def installs(self, pre):
+    def installs(self, pre, redo = False):
         if not pre:
-            window = Install()
+            window = Install(redo = redo)
             window.dialog.setStyleSheet(self.theme['qss'])
             window.firstLaunchSetup()
             window.dialog.exec_()
@@ -968,7 +968,7 @@ class Terms(Ui_Terms):
             sys.exit()
 
 class Install(Ui_Install):
-    def __init__(self):
+    def __init__(self, redo = False):
         self.dialog = QDialog()
         self.setupUi(self.dialog)
 
@@ -977,6 +977,7 @@ class Install(Ui_Install):
         self.dialog.closeEvent = self.closeEvent
 
         self.done = False
+        self.redo = redo
 
         # Remove:
         #os.name = 'nt'
@@ -1024,26 +1025,35 @@ class Install(Ui_Install):
         self.next3.setVisible(False)
         self.quit3.setVisible(False)
 
+        threading.Thread(
+            target = self.install,
+            daemon = True,
+        ).start()
+
+    def install(self):
         if not os.path.exists(con.config['ffmpeg']):
             self.hook('[No FFMPEG detected!]')
-            # Ensue installing FFMPEG via window
-            # For now, we do it automatically
+            # Install FFMPEG
             from scripts.ffmpeg import installFFMPEG, installFFMPEGMac
-            threading.Thread(
-                target = installFFMPEG if os.name == 'nt' else installFFMPEGMac,
-                args = (
+            if os.name == 'nt':
+                installFFMPEG(
                     con.config['ffmpeg'],
                     os.path.abspath(appPath),
-                    self.linkEdit.text() if os.name == 'nt' else [self.linkEdit.text(),self.linkEdit2.text()],
-                ),
-                kwargs = {
-                    'hook': self.hook,
-                },
-                daemon = True,
-            ).start()
+                    self.linkEdit.text(),
+                    hook = self.hook,
+                )
+            elif sys.platform.startswith('darwin'):
+                installFFMPEGMac(
+                    con.config['ffmpeg'],
+                    os.path.abspath(appPath),
+                    [self.linkEdit.text(), self.linkEdit2.text()],
+                    hook = self.hook,
+                )
         else:
-            self.hook('[FFMPEG found! Skipping install.]', True)
+            self.hook('[FFMPEG found! Skipping install.]')
         self.setUrlHandler()
+        
+        self.hook('[Finished setup!]', True)
 
     def setUrlHandler(self):
         # Create URL Handler
@@ -1052,10 +1062,13 @@ class Install(Ui_Install):
                 from scripts.urlRegister import write
                 loc = os.path.abspath(os.path.join(appPath, 'urlRegister.reg'))
                 write(getPath(__file__), loc)
+                self.hook('[Requesting permissions to write URL to Registry]')
                 os.system(loc)
             elif sys.platform.startswith('darwin'):
+                self.hook('[Mac .app has URL protocol defined in Info.plist]')
                 pass # Done in Info.plist
             self.hook('[Created URL Handler]')
+            self.hook('[NOTE]: (This may have failed. Please file an issue if it is not working for you.)')
 
     def hook(self, text, finished = False):
         self.installText += text + '\n'
@@ -1072,7 +1085,7 @@ class Install(Ui_Install):
 
     def closeEvent(self, event):
         event.accept()
-        if not self.done:
+        if not self.done and not self.redo:
             con.config['acceptedTerms;%s' % version] = False
             con._updateConfig()
             sys.exit()
