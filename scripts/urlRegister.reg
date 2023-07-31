@@ -1,0 +1,15 @@
+Windows Registry Editor Version 5.00
+
+[-HKEY_CLASSES_ROOT\razor]
+
+[HKEY_CLASSES_ROOT\razor]
+@=""
+"URL Protocol"=""
+
+[HKEY_CLASSES_ROOT\razor\shell]
+@=""
+
+[HKEY_CLASSES_ROOT\razor\shell\open]
+
+[HKEY_CLASSES_ROOT\razor\shell\open\command]
+@="PLACEHOLDER %1"

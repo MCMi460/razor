@@ -424,13 +424,15 @@ class GUI(Ui_MainWindow):
             return
         app = discordsdk.Discord(int(applicationID), discordsdk.CreateFlags.default)
         activity_manager = app.get_activity_manager()
-        activity_manager.register_command('razor://discord')
+        activity_manager.register_command('razor://testing123')
+        print(getPath(__file__))
 
         print(fd.log('[ActivityManager -- Registered game]'))
 
     def setUrlHandler(self):
         # Create URL Handler
         if os.name == 'nt':
+            #os.system(r'.\scripts\urlRegister.reg')
             pass # Not implemented yet
         elif sys.platform.startswith('darwin'):
             pass # Done in Info.plist
