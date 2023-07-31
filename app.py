@@ -108,9 +108,10 @@ class GUI(Ui_MainWindow):
         # File
         self.a_showSource.triggered.connect(lambda e : os.system('start %s' % appPath) if os.name == 'nt' else os.system('open %s' % appPath))
         self.a_newPlaylist.triggered.connect(lambda e : print('New Playlist!'))
-        self.a_playlistYoutube.triggered.connect(lambda e : self.playlistYoutube())
+        self.a_playlistYoutube.triggered.connect(self.playlistYoutube)
         # Help
         self.a_issue.triggered.connect(lambda e : webbrowser.open('https://github.com/MCMi460/razor/issues/new'))
+        self.a_installMenu.triggered.connect(lambda e : self.installs(False))
 
         # Volume
         self.volumeSlider.setValue(con.config['volume'])

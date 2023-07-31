@@ -64,7 +64,7 @@
        <x>30</x>
        <y>20</y>
        <width>231</width>
-       <height>91</height>
+       <height>111</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -125,6 +125,19 @@
        <string>Windows:</string>
       </property>
      </widget>
+     <widget class="QCheckBox" name="desktopShortcutBox_2">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>90</y>
+        <width>211</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Register URL Protocol razor://</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QGroupBox" name="macBox">
      <property name="enabled">
@@ -133,7 +146,7 @@
      <property name="geometry">
       <rect>
        <x>30</x>
-       <y>120</y>
+       <y>140</y>
        <width>231</width>
        <height>91</height>
       </rect>

@@ -336,6 +336,8 @@
       <string>Help</string>
      </property>
      <addaction name="a_issue"/>
+     <addaction name="separator"/>
+     <addaction name="a_installMenu"/>
     </widget>
     <widget class="QMenu" name="menuFile">
      <property name="title">
@@ -662,6 +664,11 @@
   <action name="a_playlistYoutube">
    <property name="text">
     <string>Playlist from Youtube</string>
+   </property>
+  </action>
+  <action name="a_installMenu">
+   <property name="text">
+    <string>Install Menu</string>
    </property>
   </action>
  </widget>
