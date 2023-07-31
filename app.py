@@ -76,7 +76,7 @@ class GUI(Ui_MainWindow):
 
         # URL Handler?
         #QDesktopServices.setUrlHandler('razor', self.handleUrl)
-        self.setUrlHandler()
+        #self.setUrlHandler()
 
         # Main Window
         self.MainWindow.setFixedSize(960, 600)
@@ -427,17 +427,8 @@ class GUI(Ui_MainWindow):
         app = discordsdk.Discord(int(applicationID), discordsdk.CreateFlags.default)
         activity_manager = app.get_activity_manager()
         activity_manager.register_command('razor://discord')
-        print(getPath(__file__))
 
         print(fd.log('[ActivityManager -- Registered game]'))
-
-    def setUrlHandler(self):
-        # Create URL Handler
-        if os.name == 'nt':
-            #os.system(r'.\scripts\urlRegister.reg')
-            pass # Not implemented yet
-        elif sys.platform.startswith('darwin'):
-            pass # Done in Info.plist
 
     def updatePresence(self, info:dict = {}):
         for key in info.keys():
@@ -1051,6 +1042,18 @@ class Install(Ui_Install):
             ).start()
         else:
             self.hook('[FFMPEG found! Skipping install.]', True)
+        self.setUrlHandler()
+
+    def setUrlHandler(self):
+        # Create URL Handler
+        if os.name == 'nt':
+            from scripts.urlRegister import write
+            loc = os.path.abspath(os.path.join(appPath, 'urlRegister.reg'))
+            write(getPath(__file__), loc)
+            os.system(loc)
+        elif sys.platform.startswith('darwin'):
+            pass # Done in Info.plist
+        self.hook('[Created URL Handler]')
 
     def hook(self, text, finished = False):
         self.installText += text + '\n'
