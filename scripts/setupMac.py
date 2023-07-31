@@ -8,6 +8,17 @@ OPTIONS = {
         'readline',
     ],
     'iconfile': 'layout/resources/logo.icns',
+    'plist': {
+        'CFBundleURLTypes': [
+            {
+                'CFBundleTypeRole': 'Editor',
+                'CFBundleURLName': 'Razor Music URL',
+                'CFBundleURLSchemes': [
+                    'razor',
+                ],
+            },
+        ],
+    },
 }
 
 import os

@@ -433,24 +433,7 @@ class GUI(Ui_MainWindow):
         if os.name == 'nt':
             pass # Not implemented yet
         elif sys.platform.startswith('darwin'):
-            import plistlib
-            URLHandler = {
-                'LSHandlerURLScheme': 'razor',
-                'LSHandlerRoleAll': 'org.pythonmac.unspecified.razor',
-                'LSHandlerPreferredVersions': {'LSHandlerRoleAll': '-'},
-            }
-
-            plistFile = os.path.expanduser('~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist')
-            with open(plistFile, 'rb') as plist:
-                handlers = plistlib.loads(plist.read())
-                for handler in handlers['LSHandlers']:
-                    if handler.get('LSHandlerURLScheme', '') == 'razor':
-                        print(fd.log('[Ignoring existing Razor URL handler]'))
-                        return
-                handlers['LSHandlers'].append(URLHandler)
-            with open(plistFile, 'wb') as plist:
-                print(fd.log('[Wrote PLIST URL Handler]'))
-                plist.write(plistlib.dumps(handlers))
+            pass # Done in Info.plist
 
     def updatePresence(self, info:dict = {}):
         for key in info.keys():
