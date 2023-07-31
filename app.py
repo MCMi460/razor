@@ -22,7 +22,7 @@ class GUI(Ui_MainWindow):
 
         # Discord
         self.pid = os.getpid()
-        self.party_id = random.getrandbits(128)
+        self.party_id = random.getrandbits(64)
 
         # Triggers
         self.underLyingButton = QPushButton()
@@ -237,7 +237,7 @@ class GUI(Ui_MainWindow):
         con.track['media'].set_volume(self.volumeSlider.value())
         while con.track['media'] and not con.track['media'].is_playing():
             pass
-        self.party_id = random.getrandbits(128)
+        #self.party_id = random.getrandbits(128)
         threading.Thread(target = self.updateMeta, args = (id,), daemon = True).start()
         self.progressBar.setValue(0)
         length = con.track['media'].get_length()
@@ -389,7 +389,7 @@ class GUI(Ui_MainWindow):
     def join(self, ev):
         #print(ev)
         secret = ev['secret'].split(' ')
-        # self.party_id = secret[1]
+        self.party_id = secret[1]
         # This doesn't do anything for now.
         self.stop()
         self.play(secret[0])
