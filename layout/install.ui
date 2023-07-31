@@ -125,7 +125,7 @@
        <string>Windows:</string>
       </property>
      </widget>
-     <widget class="QCheckBox" name="desktopShortcutBox_2">
+     <widget class="QCheckBox" name="registerProtocol">
       <property name="geometry">
        <rect>
         <x>20</x>
@@ -136,6 +136,9 @@
       </property>
       <property name="text">
        <string>Register URL Protocol razor://</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
       </property>
      </widget>
     </widget>

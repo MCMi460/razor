@@ -1047,14 +1047,15 @@ class Install(Ui_Install):
 
     def setUrlHandler(self):
         # Create URL Handler
-        if os.name == 'nt':
-            from scripts.urlRegister import write
-            loc = os.path.abspath(os.path.join(appPath, 'urlRegister.reg'))
-            write(getPath(__file__), loc)
-            os.system(loc)
-        elif sys.platform.startswith('darwin'):
-            pass # Done in Info.plist
-        self.hook('[Created URL Handler]')
+        if self.registerProtocol.isChecked():
+            if os.name == 'nt':
+                from scripts.urlRegister import write
+                loc = os.path.abspath(os.path.join(appPath, 'urlRegister.reg'))
+                write(getPath(__file__), loc)
+                os.system(loc)
+            elif sys.platform.startswith('darwin'):
+                pass # Done in Info.plist
+            self.hook('[Created URL Handler]')
 
     def hook(self, text, finished = False):
         self.installText += text + '\n'
