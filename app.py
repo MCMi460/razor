@@ -946,7 +946,7 @@ class Credits(Ui_Credits):
         self.imageLabel.setPixmap(QPixmap(getPath(('layout/resources/emblem.png'))))
         self.imageLabel.setScaledContents(True)
 
-        self.versionLabel.setText('Razor v%s' % version)
+        self.versionLabel.setText('Razor v%s, %s' % (version, versionName))
 
         self.gitLink.mouseReleaseEvent = lambda e : self.openLink('https://github.com/MCMi460/razor')
 

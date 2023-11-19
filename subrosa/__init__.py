@@ -2,7 +2,8 @@
 # Track Handling, Sub-Rosa
 
 # Version
-version = 1.03
+version = 1.031
+versionName = 'The Great Gatsby'
 
 # Imports
 import os, sys, random, traceback, threading, time, json, math, webbrowser, inspect, urllib
