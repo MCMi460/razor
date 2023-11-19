@@ -5,7 +5,7 @@ mix.Mix_Init(
     (mix.MIX_INIT_MP3)
 )
 
-result = mix.Mix_OpenAudio(48000, mix.MIX_DEFAULT_FORMAT, 0, 1024)
+result = mix.Mix_OpenAudio(48000, mix.MIX_DEFAULT_FORMAT, 0, 4096)
 assert result == 0
 
 if not 'MP3' in ( mix.Mix_GetChunkDecoder(n).decode('utf-8') for n in range(mix.Mix_GetNumChunkDecoders()) ):

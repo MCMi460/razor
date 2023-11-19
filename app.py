@@ -309,9 +309,11 @@ class GUI(Ui_MainWindow):
 
     def pause(self):
         con.pause()
+        self.semiUpdateMeta()
 
     def resume(self):
         con.resume()
+        self.semiUpdateMeta()
 
     def loop(self):
         self.looping = not self.looping
@@ -359,7 +361,24 @@ class GUI(Ui_MainWindow):
         else:
             pix = QPixmap(os.path.abspath(os.path.join(fd.directory, '%s/%s.jpg' % (self.providerName, id))))
         self.cache = info.copy()
+        self.semiUpdateMeta()
         self.thumbnailLabel.setPixmap(pix)
+
+    def semiUpdateMeta(self):
+        try:
+            if con.track['media'] and con.track['media'].is_playing():
+                self.cache['end'] = time.time() + (con.track['media'].get_length() - con.track['media'].get_time()) / 1000
+            else:
+                self.cache.pop('end')
+        except:
+            pass
+        try:
+            if con.track['media'] and con.track['media'].is_paused():
+                self.cache['state'] = 'Paused'
+            else:
+                self.cache.pop('state')
+        except:
+            pass
 
     # Discord RPC
     def connect(self):
@@ -445,16 +464,10 @@ class GUI(Ui_MainWindow):
             'party_size': [1, 2],
             'party_id': self.cache['id'] + '/' + str(self.party_id),
         }
-        try:
-            if con.track['media'] and con.track['media'].is_playing():
-                dict['end'] = time.time() + (con.track['media'].get_length() - con.track['media'].get_time()) / 1000
-        except:
-            pass
-        try:
-            if con.track['media'] and con.track['media'].is_paused():
-                dict['state'] = 'Paused'
-        except:
-            pass
+        if 'end' in self.cache:
+            dict['end'] = self.cache['end']
+        if 'state' in self.cache:
+            dict['state'] = self.cache['state']
         try:
             print('[Discord request]')
             if not self.cache['title']:
