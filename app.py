@@ -507,6 +507,7 @@ class GUI(Ui_MainWindow):
     def updateDuration(self):
         if con.track['media']:
             con.track['media'].set_time(self.progressBar.value())
+            self.semiUpdateMeta()
         else:
             self.stop()
         self.sliding = False
@@ -517,6 +518,7 @@ class GUI(Ui_MainWindow):
             con.track['media'].set_time(duration)
             self.currentTime.setText(self.convertToTimestamp(duration))
             self.progressBar.setValue(duration)
+            self.semiUpdateMeta()
         self.progressBar.setSliderDown(False)
 
     def toggleTheme(self):
