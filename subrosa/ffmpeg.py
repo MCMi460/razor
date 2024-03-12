@@ -15,7 +15,7 @@ def describe(preFile:str, outFile:str, coverFile:str, metadata:dict):
             outFile,
             **{
                 'metadata:g:0': 'title=' + metadata['title'],
-                'metadata:g:1': 'author=' + metadata['artist'],
+                'metadata:g:1': 'artist=' + metadata['artist'],
                 'metadata:g:2': 'album=Razor Exported Media',
                 'metadata:g:3': 'album_artist=Various People',
                 'metadata:s:v': 'comment=Cover (front)',
