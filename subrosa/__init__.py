@@ -6,7 +6,7 @@ version = 1.031
 versionName = 'The Great Gatsby'
 
 # Imports
-import os, sys, random, traceback, threading, time, json, math, webbrowser, inspect, urllib
+import os, sys, random, traceback, threading, time, json, math, webbrowser, inspect, urllib, shutil
 import yt_dlp
 try:
     os.environ['PYSDL2_DLL_PATH'] = sys._MEIPASS
@@ -25,4 +25,5 @@ from .files import *
 fd = FileSystem()
 from .audio import *
 from .sources import *
+from .ffmpeg import *
 from .console import *

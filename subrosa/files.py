@@ -62,6 +62,16 @@ class FileSystem():
 
         with open(file, 'w') as fd:
             fd.write(data)
+    
+    def copyFile(self, route:str, copyRoute:str) -> None:
+        assert isinstance(route, str)
+        assert isinstance(copyRoute, str)
+        source = self.directory + route
+        target = self.directory + copyRoute
+
+        with open(source, 'rb') as fd1:
+            with open(target, 'wb+') as fd2:
+                fd2.write(fd1.read())
 
     def appendFile(self, route:str, data) -> None:
         assert isinstance(route, str)

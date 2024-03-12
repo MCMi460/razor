@@ -107,6 +107,7 @@ class GUI(Ui_MainWindow):
         self.a_closeApp.triggered.connect(self.MainWindow.close)
         # File
         self.a_showSource.triggered.connect(lambda e : os.system('start %s' % appPath) if os.name == 'nt' else os.system('open %s' % appPath))
+        self.a_exportSources.triggered.connect(self.exportSources)
         self.a_newPlaylist.triggered.connect(lambda e : print('New Playlist!'))
         self.a_playlistYoutube.triggered.connect(self.playlistYoutube)
         # Help
@@ -328,6 +329,18 @@ class GUI(Ui_MainWindow):
             time.sleep(sec)
             element.setEnabled(True)
         threading.Thread(target = wait, daemon = True).start()
+
+    def exportSources(self):
+        fd.createDirectory('export')
+        self.errorDialog('Exports can take some time. Click OK to continue.')
+        f = lambda i : os.path.abspath(os.path.join(fd.directory, i))
+        for song in self.provider.LIST_TRACKS_INFO(GUI = True):
+            input = '%s/%s.mp3' % (self.providerName, song['id'])
+            cover = '%s/%s.jpg' % (self.providerName, song['id'])
+            output = 'export/%s.mp3' % song['id']
+            describe(f(input), f(output), f(cover), song)
+        os.system('start %s' % (fd.directory + 'export')) if os.name == 'nt' else os.system('open %s' % (fd.directory + 'export'))
+        self.errorDialog('Success')
 
     def playlistYoutube(self):
         link, ok = QInputDialog.getText(self.MainWindow, 'New Youtube Playlist', 'Enter the link of your Youtube playlist (must be public/unlisted):')

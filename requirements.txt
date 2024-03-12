@@ -9,3 +9,4 @@ chardet
 pyreadline3
 notify-py
 git+https://github.com/MCMi460/py-discord-sdk.git
+ffmpeg-python

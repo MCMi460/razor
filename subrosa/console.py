@@ -58,6 +58,8 @@ class Console():
         self._updateConfig()
 
         self.youtube.ydl_opts['ffmpeg_location'] = self.config['ffmpeg']
+        #os.environ['PATH'] += os.pathsep + self.config['ffmpeg']
+        #initFFMPEG()
 
     def _main(self):
         self._log(*self.tip)
