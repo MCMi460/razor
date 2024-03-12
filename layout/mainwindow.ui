@@ -344,6 +344,7 @@
       <string>File</string>
      </property>
      <addaction name="a_showSource"/>
+     <addaction name="a_exportSources"/>
      <addaction name="separator"/>
      <addaction name="a_newPlaylist"/>
      <addaction name="a_playlistYoutube"/>
@@ -669,6 +670,11 @@
   <action name="a_installMenu">
    <property name="text">
     <string>Install Menu</string>
+   </property>
+  </action>
+  <action name="a_exportSources">
+   <property name="text">
+    <string>Export Sources</string>
    </property>
   </action>
  </widget>
