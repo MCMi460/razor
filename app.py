@@ -332,12 +332,15 @@ class GUI(Ui_MainWindow):
 
     def exportSources(self):
         fd.createDirectory('export')
-        self.errorDialog('Exports can take some time. Click OK to continue.')
+        fileExt = ('mp3', 'm4a')
+        fileExt, ok = self.selectDialog('Exports can take some time. Click OK to continue.', fileExt)
+        if not ok:
+            return
         f = lambda i : os.path.abspath(os.path.join(fd.directory, i))
         for song in self.provider.LIST_TRACKS_INFO(GUI = True):
             input = '%s/%s.mp3' % (self.providerName, song['id'])
             cover = '%s/%s.jpg' % (self.providerName, song['id'])
-            output = 'export/%s.mp3' % song['id']
+            output = 'export/%s.%s' % (song['id'], fileExt)
             describe(f(input), f(output), f(cover), song)
         os.system('start %s' % (fd.directory + 'export')) if os.name == 'nt' else os.system('open %s' % (fd.directory + 'export'))
         self.errorDialog('Success')
@@ -950,6 +953,14 @@ class GUI(Ui_MainWindow):
             parent = self.MainWindow,
         )
         dialog.exec_()
+    
+    def selectDialog(self, text:str, items:list):
+        return QInputDialog.getItem(
+            self.MainWindow,
+            'Razor',
+            text,
+            items,
+        )
 
 class Credits(Ui_Credits):
     def __init__(self):

@@ -9,18 +9,20 @@ except:
 
 def describe(preFile:str, outFile:str, coverFile:str, metadata:dict):
     try:
+        kwargs = {
+            'metadata:g:0': 'title=' + metadata['title'],
+            'metadata:g:1': 'artist=' + metadata['artist'],
+            'metadata:g:2': 'album=Razor Exported Media',
+            'metadata:g:3': 'album_artist=Various People',
+            'metadata:s:v': 'comment=Cover (front)',
+        }
+        if preFile.split('.')[-1] == outFile.split('.')[-1]:
+            kwargs['c'] = 'copy'
         stream = ffmpeg.output(
             ffmpeg.input(preFile),
             ffmpeg.input(coverFile),
             outFile,
-            **{
-                'metadata:g:0': 'title=' + metadata['title'],
-                'metadata:g:1': 'artist=' + metadata['artist'],
-                'metadata:g:2': 'album=Razor Exported Media',
-                'metadata:g:3': 'album_artist=Various People',
-                'metadata:s:v': 'comment=Cover (front)',
-                'c': 'copy',
-            },
+            **kwargs,
         )
         print('[DEBUG]: ' + ' '.join(ffmpeg.compile(stream)))
         ffmpeg.run(
