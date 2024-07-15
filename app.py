@@ -332,6 +332,7 @@ class GUI(Ui_MainWindow):
 
     def exportSources(self):
         fd.createDirectory('export')
+        skipExisting = self.boolDialog('Skip existing exports?')
         fileExt = ('mp3', 'm4a')
         fileExt, ok = self.selectDialog('Exports can take some time. Click OK to continue.', fileExt)
         if not ok:
@@ -341,6 +342,8 @@ class GUI(Ui_MainWindow):
             input = '%s/%s.mp3' % (self.providerName, song['id'])
             cover = '%s/%s.jpg' % (self.providerName, song['id'])
             output = 'export/%s.%s' % (song['id'], fileExt)
+            if skipExisting and os.path.isfile(f(output)):
+                continue
             describe(f(input), f(output), f(cover), song)
         os.system('start %s' % (fd.directory + 'export')) if os.name == 'nt' else os.system('open %s' % (fd.directory + 'export'))
         self.errorDialog('Success')
@@ -492,7 +495,7 @@ class GUI(Ui_MainWindow):
                 rpc.set_activity(pid = self.pid, **dict)
         except pypresence.exceptions.PipeClosed:
             print(fd.log('[Discord pipe closed. Attempting reconnect]'))
-            connect()
+            self.connect()
         except RuntimeError as e:
             print(fd.log('[Discord event loop error ignored: %s]' % e))
 
@@ -961,6 +964,13 @@ class GUI(Ui_MainWindow):
             text,
             items,
         )
+    
+    def boolDialog(self, text:str):
+        return QMessageBox.question(
+            self.MainWindow,
+            'Razor',
+            text,
+        ) == QMessageBox.Yes
 
 class Credits(Ui_Credits):
     def __init__(self):
