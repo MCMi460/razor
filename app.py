@@ -473,6 +473,7 @@ class GUI(Ui_MainWindow):
         for key in info.keys():
             self.cache[key] = info[key]
         dict = {
+            'activity_type': pypresence.ActivityType.LISTENING,
             'details': self.cache['title'],
             'large_image': self.cache['thumbnail'],
             'large_text': self.cache['title'],
