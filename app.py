@@ -52,6 +52,12 @@ class GUI(Ui_MainWindow):
 
         # Events
         self.MainWindow.closeEvent = self.closeEvent
+        
+        if not fd.isFile('stats.json'):
+            self.stats = {'$created': time.time()}
+            fd.createFile('stats.json', json.dumps(self.stats))
+        else:
+            self.stats = json.loads(fd.readFile('stats.json'))
 
     def setup(self):
         # OS specifics #
@@ -226,6 +232,11 @@ class GUI(Ui_MainWindow):
             if not id:
                 id = self.queue[0]
             threading.Thread(target = self._constantPlay, args = (self.providerName, id,), daemon = True).start()
+            # Add to stats.json
+            if not id in self.stats.keys():
+                self.stats[id] = 0
+            self.stats[id] += 1
+            fd.createFile('stats.json', json.dumps(self.stats))
         self.playButton.setIcon(self.theme['pauseImage'])
         self.underLyingButton.clicked.emit()
 
