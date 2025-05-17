@@ -396,9 +396,14 @@ class GUI(Ui_MainWindow):
 
     def semiUpdateMeta(self):
         try:
-            if con.track['media'] and con.track['media'].is_playing():
-                self.cache['end'] = time.time() + (con.track['media'].get_length() - con.track['media'].get_time()) / 1000
+            if con.track['media']:
+                self.cache['start'] = time.time() - con.track['media'].get_time() / 1000
+                if con.track['media'].is_playing():
+                    self.cache['end'] = time.time() + (con.track['media'].get_length() - con.track['media'].get_time()) / 1000
+                else:
+                    self.cache.pop('end')
             else:
+                self.cache.pop('start')
                 self.cache.pop('end')
         except:
             pass
@@ -483,7 +488,7 @@ class GUI(Ui_MainWindow):
     def updatePresence(self, info:dict = {}):
         for key in info.keys():
             self.cache[key] = info[key]
-        dict = {
+        fields = {
             'activity_type': pypresence.ActivityType.LISTENING,
             'details': self.cache['title'],
             'large_image': self.cache['thumbnail'],
@@ -496,15 +501,15 @@ class GUI(Ui_MainWindow):
             'party_id': self.cache['id'] + '/' + str(self.party_id),
         }
         if 'end' in self.cache:
-            dict['end'] = self.cache['end']
-        if 'state' in self.cache:
-            dict['state'] = self.cache['state']
+            fields['start'] = self.cache['start']
+            fields['end'] = self.cache['end']
+        fields['state'] = (self.cache['state'] + ' - ' if 'state' in self.cache else '') + self.cache['artist']
         try:
             print('[Discord request]')
             if not self.cache['title']:
                 rpc.clear_activity(pid = self.pid)
             else:
-                rpc.set_activity(pid = self.pid, **dict)
+                rpc.set_activity(pid = self.pid, **fields)
         except pypresence.exceptions.PipeClosed:
             print(fd.log('[Discord pipe closed. Attempting reconnect]'))
             self.connect()
